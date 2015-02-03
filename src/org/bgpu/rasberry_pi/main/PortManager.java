@@ -5,6 +5,12 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
+/**
+ * осуществляет передачу сообщений между arduino и raspberry pi
+ * сообщения разделяются separator
+ * @author bazinga
+ *
+ */
 public class PortManager {
 
 	/**
@@ -22,6 +28,10 @@ public class PortManager {
 	 */
 	private int sleep = 1000;
 	
+	/**
+	 * разделитель сообщений
+	 */
+	private char separator = ';';
 	/**
 	 * семафор
 	 * необходим для преостановления потока, пока не будут полученны все данные с устройства
@@ -64,7 +74,7 @@ public class PortManager {
 
 	/**
 	 * метод отправляет команду на arduino и ожидает результата
-	 * команда должна быть вида [command]
+	 * команда должна быть вида commandName:par1:par2:...parN
 	 * @param commandTo команда ардуине
 	 * @return результат выполнения команды
 	 */
@@ -72,7 +82,7 @@ public class PortManager {
 		String result = "";
 		serialReader.clear();
 		try {
-			serialPort.writeBytes(commandTo.getBytes());
+			serialPort.writeBytes((commandTo + separator).getBytes());
 			synchronized (obj) {
 	    		obj.wait();
 	    	}
@@ -90,7 +100,7 @@ public class PortManager {
 		 * данные, которые считываются с arduino
 		 */
 		private String answer = "";
-		
+
 		@Override
 		public void serialEvent(SerialPortEvent spe) {
 			if (spe.isRXCHAR()) {//если пришли символы
@@ -113,7 +123,7 @@ public class PortManager {
 		 * @return true [false]
 		 */
 		private boolean ready() {
-			return !answer.equals("") && answer.charAt(answer.length() - 1) == ']';
+			return !answer.equals("") && answer.charAt(answer.length() - 1) == separator;
 		}
 		
 		/**
@@ -123,7 +133,7 @@ public class PortManager {
 		 * @return
 		 */
 		public String getAnswer() {
-			return answer;
+			return answer.substring(0, answer.length() - 1);
 		}
 		
 		/**

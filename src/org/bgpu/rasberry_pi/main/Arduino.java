@@ -19,7 +19,7 @@ public class Arduino {
 	/**
 	 * список команд, которые может выполнять ардуина
 	 */
-	private ArrayList<String> listCommand = new ArrayList<>();
+	private ArrayList<String> listCommandNames = new ArrayList<>();
 	
 	/**
 	 * устанавливает соответствие arduino c именем порта
@@ -30,13 +30,11 @@ public class Arduino {
 		portManager.openPort();
 		
 		//запрашиваем у устройства его внутренне имя
-		name = portManager.work("[name]").replace("[", "").replace("]", "");
+		name = portManager.work("name");
 		
-		//получаем список команд, которые может выполнять данное устройство
-		String lc = portManager.work("[listCommand]");
-		StringTokenizer st = new StringTokenizer(lc, ",[]");
-		while (st.hasMoreTokens())
-			listCommand.add(st.nextToken());
+		StringTokenizer tokenizer = new StringTokenizer(portManager.work("listCommand"), ",");
+		while (tokenizer.hasMoreTokens())
+			listCommandNames.add(tokenizer.nextToken());
 	}
 	
 	/**

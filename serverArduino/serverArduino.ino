@@ -16,6 +16,7 @@ void setup() {
 
 void loop() {
      if (end_command) {
+         command.replace(";", "");
          doSomeThing(command);
          
          command = "";
@@ -27,44 +28,26 @@ void serialEvent() {
      while (Serial.available()) {
           char c = (char)Serial.read();
           command += c;
-          if (c == ']')
+          if (c == ';')
               end_command = true;
      }
 }
 
-void parseStringToCommand(String strForParsing, String &name, int &value) {
-    strForParsing.replace("]", "");
-    strForParsing.replace("[", "");
-    name = strForParsing.substring(0, strForParsing.indexOf('='));
-    value = strForParsing.substring(strForParsing.indexOf('=') + 1).toInt();
+void runCommand(String _command) {
+    //выполнение команды
+    Serial.print(_command + " - return from " + name_arduino + " arduino;");
 }
 
-boolean check(String name) {
-  boolean result = false; 
-  for(int i = 0; i < length_listCommands && !result; ++i)
-      if (listCommands[i] == name)
-          result = true;
-  return result;
-}
-
-void runCommand(String name, int value) {
-    if (check(name)) {
-         //выполнение команды
-        Serial.print("[" + name + "=" + value + ":rfa]");
-    } else Serial.print("[unknownCommand]");
-}
 
 void doSomeThing(String _command) {
-     if (command == "[name]") Serial.print("[" + name_arduino + "]");
-     else if (command == "[listCommand]") {
-         String lc = "[";
-         for(int i = 0; i < length_listCommands - 1; ++i)
-             lc += listCommands[i] + ",";
-         Serial.print(lc + "]");
+     if (command == "name") Serial.print(name_arduino + ";");
+     else if (command == "listCommand") {
+         String answer = "";
+         for(int i = 0; i < length_listCommands - 1; i++)
+             answer += listCommands[i] + ",";
+         answer += listCommands[length_listCommands - 1] + ";";
+         Serial.print(answer);
      } else {
-         String name;
-         int value;
-         parseStringToCommand(command, name, value);
-         runCommand(name, value);
+         runCommand(_command);
      }
 }
