@@ -4,7 +4,7 @@ boolean end_command = false;
 
 String name_arduino = "left_arduino";
 
-const int length_listCommands = 11;
+const int length_listCommands = 10;
 String listCommands[length_listCommands] = {"name", "listCommand", "poweroff", "ver", "throat", "neck", "larmup", "larmpit",
   "lbicep", "lspeed"};
 
