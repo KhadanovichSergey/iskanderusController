@@ -13,6 +13,7 @@ public class Server {
 	
 	public static void main(String... args) {
 		try {
+			@SuppressWarnings("resource")
 			ServerSocket ss = new ServerSocket(1010);
 			while (true) {
 				Socket socket = ss.accept();
