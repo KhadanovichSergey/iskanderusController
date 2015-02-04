@@ -5,9 +5,8 @@ boolean end_command = false;
 String name_arduino = "left_arduino";
 
 const int length_listCommands = 11;
-String listCommands[length_listCommands] = {"name", "listCommand", "headUpDown", "headLeftRight",
-  "handFrontUpDown", "handSideUpDown", "fingerLeft0", "fingerLeft1", "fingerLeft2",
-  "fingerLeft3", "fingerLeft4"};
+String listCommands[length_listCommands] = {"name", "listCommand", "poweroff", "ver", "throat", "neck", "larmup", "larmpit",
+  "lbicep", "lspeed"};
 
 void setup() {
     Serial.begin(9600);
