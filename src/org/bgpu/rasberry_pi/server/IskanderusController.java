@@ -1,9 +1,11 @@
-package org.bgpu.rasberry_pi.core;
+package org.bgpu.rasberry_pi.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+
+import org.bgpu.rasberry_pi.core.Arduino;
 
 import jssc.SerialPortList;
 
@@ -13,15 +15,18 @@ import jssc.SerialPortList;
 public class IskanderusController {
 
 	/**
-	 * список ардуин, которые управляют роботом
+	 * список контроллеров ардуин со встроенными очередями задач
 	 */
-	private ArrayList<Arduino> listArduino = new ArrayList<>();
+	private ArrayList<ArduinoManager> arduinoManagers = new ArrayList<>();
 	
 	public IskanderusController() {
 		String[] portNames = SerialPortList.getPortNames();
 		for(String s : portNames)
-			if (IskanderusController.Finder.isArduino(s))
-				listArduino.add(new Arduino(s));
+			if (IskanderusController.Finder.isArduino(s)) {
+				ArduinoManager am = new ArduinoManager(new Arduino(s));
+				am.start();
+				arduinoManagers.add(am);
+			}
 	}
 	
 	/**

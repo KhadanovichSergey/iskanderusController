@@ -1,6 +1,6 @@
 package org.bgpu.rasberry_pi.main;
 
-import org.bgpu.rasberry_pi.core.IskanderusController;
+import org.bgpu.rasberry_pi.server.IskanderusController;
 
 public class Main {
 

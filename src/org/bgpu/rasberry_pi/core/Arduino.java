@@ -45,4 +45,26 @@ public class Arduino {
 	public String getName() {
 		return name;
 	}
+	
+	/**
+	 * проверяет, может ли данное устройство выполнять команду с именем commandName
+	 * @param commandName название команды
+	 * @return true - может выполнять эту команду, false - не может
+	 */
+	public boolean hasCommand(String commandName) {
+		boolean result = false;
+		for(int i = 0; i < listCommandNames.size(); ++i)
+			if (listCommandNames.get(i).equals(commandName))
+				result = true;
+		return result;
+	}
+	
+	/**
+	 * ардуина выполняет команду command и возвращает результат этой команды
+	 * @param command команда
+	 * @return результат работы команды
+	 */
+	public String work(String command) {
+		return portManager.work(command);
+	}
 }
