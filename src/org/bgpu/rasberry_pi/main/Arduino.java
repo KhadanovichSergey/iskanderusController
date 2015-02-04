@@ -6,8 +6,7 @@ import java.util.StringTokenizer;
 public class Arduino {
 
 	/**
-	 * внутреннее имя устройства(не понятно зачем оно мне вообще нужно)
-	 * ну пусть будет, вдруг пригодится
+	 * внутренне имя устройства
 	 */
 	private String name;
 	
@@ -17,7 +16,7 @@ public class Arduino {
 	private PortManager portManager;
 
 	/**
-	 * список команд, которые может выполнять ардуина
+	 * список имен команд, которые может выполнять ардуина
 	 */
 	private ArrayList<String> listCommandNames = new ArrayList<>();
 	
@@ -32,6 +31,8 @@ public class Arduino {
 		//запрашиваем у устройства его внутренне имя
 		name = portManager.work("name");
 		
+		//запращиваем у устройства список названий команд, которая может выполнять
+		//это устройство....
 		StringTokenizer tokenizer = new StringTokenizer(portManager.work("listCommand"), ",");
 		while (tokenizer.hasMoreTokens())
 			listCommandNames.add(tokenizer.nextToken());
