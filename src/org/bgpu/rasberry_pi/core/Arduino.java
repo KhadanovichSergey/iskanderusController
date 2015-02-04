@@ -53,7 +53,7 @@ public class Arduino {
 	 */
 	public boolean hasCommand(String commandName) {
 		boolean result = false;
-		for(int i = 0; i < listCommandNames.size(); ++i)
+		for(int i = 0; i < listCommandNames.size() && !result; ++i)
 			if (listCommandNames.get(i).equals(commandName))
 				result = true;
 		return result;
