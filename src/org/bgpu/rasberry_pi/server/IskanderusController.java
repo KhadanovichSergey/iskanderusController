@@ -3,6 +3,7 @@ package org.bgpu.rasberry_pi.server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.util.ArrayList;
 
 import org.bgpu.rasberry_pi.core.Arduino;
@@ -27,6 +28,16 @@ public class IskanderusController {
 				am.start();
 				arduinoManagers.add(am);
 			}
+	}
+	
+	/**
+	 * добавляет сокет, в один из менеджеров
+	 * @param newSocket сокет, который нужно добавить
+	 */
+	public void addSocket(Socket newSocket) {
+		boolean mark = false;
+		for(int i = 0; i < arduinoManagers.size() && !mark; ++i)
+			mark = arduinoManagers.get(i).addSocket(newSocket);
 	}
 	
 	/**
