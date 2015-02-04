@@ -1,4 +1,4 @@
-package org.bgpu.rasberry_pi.main;
+package org.bgpu.rasberry_pi.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;

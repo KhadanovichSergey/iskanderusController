@@ -1,4 +1,4 @@
-package org.bgpu.rasberry_pi.main;
+package org.bgpu.rasberry_pi.core;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
