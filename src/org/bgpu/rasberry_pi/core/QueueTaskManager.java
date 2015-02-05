@@ -9,6 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+/**
+ * буферезированная очередь к порту
+ * @author bazinga
+ *
+ */
 public class QueueTaskManager extends Thread {
 	
 	/**
