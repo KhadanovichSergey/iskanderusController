@@ -41,11 +41,12 @@ public class IskanderusController {
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
 			String textCommand = reader.readLine();
-			String nameCommand = textCommand.substring(0, textCommand.indexOf(':'));
+			int index = textCommand.indexOf(':');
+			String nameCommand = textCommand.substring(0, (index == -1) ? textCommand.length() : index);
 			
 			QueueTaskManager qtm = table.get(nameCommand);
-			
-			qtm.addTask(textCommand, newSocket);
+			if (qtm != null)
+				qtm.addTask(textCommand, newSocket);
 		} catch(IOException ioe) {ioe.printStackTrace();}
 	}
 	
