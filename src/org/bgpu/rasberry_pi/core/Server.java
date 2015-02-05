@@ -1,4 +1,4 @@
-package org.bgpu.rasberry_pi.server;
+package org.bgpu.rasberry_pi.core;
 
 import java.io.IOException;
 import java.net.ServerSocket;

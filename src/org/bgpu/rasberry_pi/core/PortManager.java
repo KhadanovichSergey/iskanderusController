@@ -9,7 +9,6 @@ import jssc.SerialPortException;
  * осуществляет передачу сообщений между arduino и raspberry pi
  * сообщения разделяются separator
  * @author bazinga
- *
  */
 public class PortManager {
 
@@ -32,6 +31,7 @@ public class PortManager {
 	 * разделитель сообщений
 	 */
 	private char separator = ';';
+	
 	/**
 	 * семафор
 	 * необходим для преостановления потока, пока не будут полученны все данные с устройства

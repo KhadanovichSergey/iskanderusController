@@ -1,12 +1,11 @@
-package org.bgpu.rasberry_pi.server;
+package org.bgpu.rasberry_pi.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-
-import org.bgpu.rasberry_pi.core.Arduino;
+import java.util.Hashtable;
+import java.util.List;
 
 import jssc.SerialPortList;
 
@@ -14,30 +13,31 @@ import jssc.SerialPortList;
  * @author bzinga
  */
 public class IskanderusController {
-
+	
 	/**
-	 * список контроллеров ардуин со встроенными очередями задач
+	 * таблица ассоциаций названия команды с очередью на устройство, которое
+	 * может выполнять задачу с таким именем
 	 */
-	private ArrayList<ArduinoManager> arduinoManagers = new ArrayList<>();
+	private Hashtable<String, QueueTaskManager> table = new Hashtable<>();
 	
 	public IskanderusController() {
 		String[] portNames = SerialPortList.getPortNames();
 		for(String s : portNames)
 			if (IskanderusController.Finder.isArduino(s)) {
-				ArduinoManager am = new ArduinoManager(new Arduino(s));
-				am.start();
-				arduinoManagers.add(am);
+				QueueTaskManager qtm = new QueueTaskManager(s);
+				List<String> commandNames = qtm.getCommandNames();
+				for(String cn : commandNames)
+					table.put(cn, qtm);
+				qtm.start();
 			}
 	}
 	
-	/**
-	 * добавляет сокет, в один из менеджеров
-	 * @param newSocket сокет, который нужно добавить
-	 */
 	public void addSocket(Socket newSocket) {
-		boolean mark = false;
-		for(int i = 0; i < arduinoManagers.size() && !mark; ++i)
-			mark = arduinoManagers.get(i).addSocket(newSocket);
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(newSocket.getInputStream()))) {
+			String textCommand = reader.readLine();
+			String nameCommand = textCommand.substring(0, textCommand.indexOf(':'));
+			table.get(nameCommand).addTask(textCommand, newSocket);
+		} catch(IOException ioe) {ioe.printStackTrace();}
 	}
 	
 	/**
