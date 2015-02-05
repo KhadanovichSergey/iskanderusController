@@ -18,9 +18,7 @@ public class Server {
 			while (true) {
 				Socket socket = ss.accept();
 				new Thread(() -> {
-					synchronized (ic) {
-						ic.addSocket(socket);
-					}
+					ic.addSocket(socket);
 				}).start();
 			}
 		} catch (IOException e) {e.printStackTrace();}

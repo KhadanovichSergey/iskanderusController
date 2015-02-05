@@ -51,13 +51,11 @@ public class QueueTaskManager extends Thread {
 	@Override
 	public void run() {
 		while (true) {
-			try {
-				synchronized (tasks) {
-					if (!tasks.isEmpty())
-						work(tasks.remove());
-				}
-				Thread.sleep(5);
-			} catch(InterruptedException ie) {ie.printStackTrace();}
+			synchronized (tasks) {
+				if (!tasks.isEmpty())
+					work(tasks.remove());
+			}
+			Thread.yield();
 		}
 	}
 	

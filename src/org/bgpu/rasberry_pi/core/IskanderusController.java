@@ -32,6 +32,10 @@ public class IskanderusController {
 			}
 	}
 	
+	/**
+	 * добавляет задачу из сокета в очередь к устройству
+	 * @param newSocket
+	 */
 	public void addSocket(Socket newSocket) {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(newSocket.getInputStream()))) {
 			String textCommand = reader.readLine();
