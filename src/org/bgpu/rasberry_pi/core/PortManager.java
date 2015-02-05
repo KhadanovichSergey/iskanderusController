@@ -147,4 +147,12 @@ public class PortManager {
 			answer = "";
 		}
 	}
+	
+	/**
+	 * возвращает имя порта
+	 * @return имя порта
+	 */
+	public String getPortName() {
+		return serialPort.getPortName();
+	}
 }

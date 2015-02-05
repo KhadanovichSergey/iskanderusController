@@ -135,4 +135,14 @@ public class QueueTaskManager extends Thread {
 		}
 		return result;
 	}
+	
+	/**
+	 * возвращает имя порта, для которая выстроенная данная очередь
+	 * @return имя порта
+	 */
+	public String getPortName() {
+		synchronized (portManager) {
+			return portManager.getPortName();
+		}
+	}
 }
