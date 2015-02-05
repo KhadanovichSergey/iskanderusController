@@ -68,11 +68,12 @@ public class QueueTaskManager extends Thread {
 	private void work(Task task) {
 		synchronized (portManager) {
 			String resultWorkCommand = portManager.work(task.getTextCommand());
-			try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(task.getSocket().getOutputStream()))) {
+			try {
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(task.getSocket().getOutputStream()));
 				writer.write(resultWorkCommand + "\n");
 				writer.flush();
 				task.getSocket().close();
-			} catch (IOException ioe) {ioe.printStackTrace();}
+			} catch(IOException ioe) {ioe.printStackTrace();}
 		}
 	}
 	
