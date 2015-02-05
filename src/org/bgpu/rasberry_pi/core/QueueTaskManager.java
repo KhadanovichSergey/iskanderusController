@@ -71,8 +71,6 @@ public class QueueTaskManager extends Thread {
 			try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(task.getSocket().getOutputStream()))) {
 				writer.write(resultWorkCommand + "\n");
 				writer.flush();
-				
-				//не уверен на счет этого действия
 				task.getSocket().close();
 			} catch (IOException ioe) {ioe.printStackTrace();}
 		}
