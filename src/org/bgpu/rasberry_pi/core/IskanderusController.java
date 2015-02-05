@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 
 import jssc.SerialPortList;
@@ -18,7 +18,7 @@ public class IskanderusController {
 	 * таблица ассоциаций названия команды с очередью на устройство, которое
 	 * может выполнять задачу с таким именем
 	 */
-	private Hashtable<String, QueueTaskManager> table = new Hashtable<>();
+	private HashMap<String, QueueTaskManager> table = new HashMap<>();
 	
 	public IskanderusController() {
 		String[] portNames = SerialPortList.getPortNames();
@@ -26,8 +26,9 @@ public class IskanderusController {
 			if (IskanderusController.Finder.isArduino(s)) {
 				QueueTaskManager qtm = new QueueTaskManager(s);
 				List<String> commandNames = qtm.getCommandNames();
-				for(String cn : commandNames)
+				for(String cn : commandNames) {
 					table.put(cn, qtm);
+				}
 				qtm.start();
 			}
 	}
@@ -37,10 +38,14 @@ public class IskanderusController {
 	 * @param newSocket
 	 */
 	public void addSocket(Socket newSocket) {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(newSocket.getInputStream()))) {
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
 			String textCommand = reader.readLine();
 			String nameCommand = textCommand.substring(0, textCommand.indexOf(':'));
-			table.get(nameCommand).addTask(textCommand, newSocket);
+			
+			QueueTaskManager qtm = table.get(nameCommand);
+			
+			qtm.addTask(textCommand, newSocket);
 		} catch(IOException ioe) {ioe.printStackTrace();}
 	}
 	

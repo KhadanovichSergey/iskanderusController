@@ -13,8 +13,10 @@ public class Server {
 	
 	public static void main(String... args) {
 		try {
+			System.out.println("starting server...");
 			@SuppressWarnings("resource")
 			ServerSocket ss = new ServerSocket(1010);
+			System.out.println("started server");
 			while (true) {
 				Socket socket = ss.accept();
 				new Thread(() -> {

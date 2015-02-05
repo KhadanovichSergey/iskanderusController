@@ -27,6 +27,7 @@ public class QueueTaskManager extends Thread {
 	 */
 	public QueueTaskManager(PortManager newPortManager) {
 		portManager = newPortManager;
+		portManager.openPort();
 	}
 	
 	/**
@@ -35,6 +36,7 @@ public class QueueTaskManager extends Thread {
 	 */
 	public QueueTaskManager(String portName) {
 		portManager = new PortManager(portName);
+		portManager.openPort();
 	}
 	
 	/**
