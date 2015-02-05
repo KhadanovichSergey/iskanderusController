@@ -7,7 +7,7 @@ import java.net.Socket;
 public class Server {
 
 	/**
-	 * контроллер всех менеджеров ардуин
+	 * контроллер всех менеджеров задач
 	 */
 	private static IskanderusController ic = new IskanderusController();
 	
