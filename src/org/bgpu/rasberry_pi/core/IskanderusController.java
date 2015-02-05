@@ -26,9 +26,8 @@ public class IskanderusController {
 			if (IskanderusController.Finder.isArduino(s)) {
 				QueueTaskManager qtm = new QueueTaskManager(s);
 				List<String> commandNames = qtm.getCommandNames();
-				for(String cn : commandNames) {
+				for(String cn : commandNames)
 					table.put(cn, qtm);
-				}
 				qtm.start();
 			}
 	}
