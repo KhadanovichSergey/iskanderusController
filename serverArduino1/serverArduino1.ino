@@ -39,8 +39,8 @@ void runCommand(String _command) {
 
 
 void doSomeThing(String _command) {
-     if (command == "name") Serial.print(name_arduino + ";");
-     else if (command == "listCommand") {
+     if (command == listCommands[0]) Serial.print(name_arduino + ";");
+     else if (command == listCommands[1]) {
          String answer = "";
          for(int i = 0; i < length_listCommands - 1; i++)
              answer += listCommands[i] + ",";
