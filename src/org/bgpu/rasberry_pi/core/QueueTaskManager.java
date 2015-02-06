@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 /**
  * буферезированная очередь к порту
@@ -15,6 +16,8 @@ import java.util.StringTokenizer;
  *
  */
 public class QueueTaskManager {
+	
+	private static Logger LOGGER = Logger.getLogger(QueueTaskManager.class.getName());
 	
 	/**
 	 * порт, который ассоциируется с устройством
@@ -190,10 +193,10 @@ public class QueueTaskManager {
 					boolean isEmpty = false;
 					synchronized (tasks) {
 						if (tasks.isEmpty()) {
-							System.out.println("I'm going sleep");
+							LOGGER.info("I'm going sleep");
 							isEmpty = true;
 						} else {
-							System.out.println("I'm working command");
+							LOGGER.info("I'm working command");
 							work(tasks.remove());
 						}
 					}
