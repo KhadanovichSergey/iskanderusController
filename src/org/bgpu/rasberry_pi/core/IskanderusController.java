@@ -121,6 +121,7 @@ public class IskanderusController {
 					}
 				}
 			}
+			
 			setLast.removeAll(setNow); //множетсов команд, которые были подключенны, а сейчас пропали
 			
 			//удаляем эти устройства из всех структур данных
