@@ -48,6 +48,7 @@ public class IskanderusController {
 			String nameCommand = textCommand.substring(0, (index == -1) ? textCommand.length() : index);
 			
 			QueueTaskManager qtm = table.get(nameCommand);
+			
 			if (qtm != null) {//если задача распознана
 				qtm.addTask(textCommand, newSocket);
 				System.out.println("command is recognized : " + textCommand);
@@ -117,7 +118,6 @@ public class IskanderusController {
 						List<String> commandNames = qtm.getCommandNames();
 						for(String cn : commandNames)
 							table.put(cn, qtm);//команды добавляются в хэш
-						qtm.start();//стартуется очередь для данного устройства
 					}
 				}
 			}

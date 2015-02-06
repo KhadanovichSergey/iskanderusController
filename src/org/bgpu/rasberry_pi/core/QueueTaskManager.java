@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
  * @author bazinga
  *
  */
-public class QueueTaskManager extends Thread {
+public class QueueTaskManager {
 	
 	/**
 	 * порт, который ассоциируется с устройством
@@ -27,12 +27,18 @@ public class QueueTaskManager extends Thread {
 	private LinkedList<Task> tasks = new LinkedList<>();
 	
 	/**
+	 * поток, отвечающий за выполнение команд
+	 */
+	private Worker worker = new Worker();
+	
+	/**
 	 * создает очередь задачь к данному portManager
 	 * @param newPortManager объект, к которому нужно создать очередь задачь
 	 */
 	public QueueTaskManager(PortManager newPortManager) {
 		portManager = newPortManager;
 		portManager.openPort();
+		new Thread(worker).start();
 	}
 	
 	/**
@@ -42,6 +48,7 @@ public class QueueTaskManager extends Thread {
 	public QueueTaskManager(String portName) {
 		portManager = new PortManager(portName);
 		portManager.openPort();
+		new Thread(worker).start();
 	}
 	
 	/**
@@ -51,19 +58,9 @@ public class QueueTaskManager extends Thread {
 	 */
 	public void addTask(String textCommand, Socket socket) {
 		synchronized (tasks) {
-			tasks.add(new Task(textCommand, socket));
+			tasks.add(new Task(textCommand, socket));;
 		}
-	}
-	
-	@Override
-	public void run() {
-		while (true) {
-			synchronized (tasks) {
-				if (!tasks.isEmpty())
-					work(tasks.remove());
-			}
-			Thread.yield();
-		}
+		worker.resume();
 	}
 	
 	/**
@@ -79,6 +76,31 @@ public class QueueTaskManager extends Thread {
 				writer.flush();
 				task.getSocket().close();
 			} catch(IOException ioe) {ioe.printStackTrace();}
+		}
+	}
+	
+	/**
+	 * возвращает список команд, который можно посылать на данное устройство
+	 * этот метод желательно вызывать до того, как потом будет стартовам
+	 * @return список команд
+	 */
+	public List<String> getCommandNames() {
+		ArrayList<String> result = new ArrayList<>();
+		synchronized (portManager) {
+			StringTokenizer st = new StringTokenizer(portManager.work("listCommand"), ",");
+			while (st.hasMoreTokens())
+				result.add(st.nextToken());
+		}
+		return result;
+	}
+	
+	/**
+	 * возвращает имя порта, для которая выстроенная данная очередь
+	 * @return имя порта
+	 */
+	public String getPortName() {
+		synchronized (portManager) {
+			return portManager.getPortName();
 		}
 	}
 	
@@ -122,27 +144,57 @@ public class QueueTaskManager extends Thread {
 	}
 	
 	/**
-	 * возвращает список команд, который можно посылать на данное устройство
-	 * этот метод желательно вызывать до того, как потом будет стартовам
-	 * @return список команд
+	 * выполнятель команд
+	 * @author bazinga
+	 *
 	 */
-	public List<String> getCommandNames() {
-		ArrayList<String> result = new ArrayList<>();
-		synchronized (portManager) {
-			StringTokenizer st = new StringTokenizer(portManager.work("listCommand"), ",");
-			while (st.hasMoreTokens())
-				result.add(st.nextToken());
+	class Worker implements Runnable {
+		
+		/**
+		 * объект для синхронизации
+		 */
+		private Object obj = new Object();
+		
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					boolean isEmpty = false;
+					synchronized (tasks) {
+						if (tasks.isEmpty()) {
+							System.out.println("I'm going sleep");
+							isEmpty = true;
+						} else {
+							System.out.println("I'm working command");
+							work(tasks.remove());
+						}
+					}
+					if (isEmpty)
+						synchronized (obj) {
+							obj.wait();
+						}
+				} catch (InterruptedException iex) {iex.printStackTrace();}
+				Thread.yield();
+			}
 		}
-		return result;
-	}
-	
-	/**
-	 * возвращает имя порта, для которая выстроенная данная очередь
-	 * @return имя порта
-	 */
-	public String getPortName() {
-		synchronized (portManager) {
-			return portManager.getPortName();
+		
+		/**
+		 * приостановить выполнение команд
+		 * @throws InterruptedException
+		 */
+		public void pause() throws InterruptedException {
+			synchronized (obj) {
+				obj.wait();
+			}
+		}
+		
+		/**
+		 * продолжить выполнение команд
+		 */
+		public void resume() {
+			synchronized (obj) {
+				obj.notify();
+			}
 		}
 	}
 }
