@@ -73,7 +73,7 @@ public class IskanderusController {
 		 * @param name имя устройства (пример, /dev/ttyACA0)
 		 * @return true - если данное устройство ардуина, false - если нет
 		 */
-		public boolean isArduino(String name) {
+		private boolean isArduino(String name) {
 			boolean result = false;
 			ProcessBuilder pb = new ProcessBuilder("udevadm", "info", "--query=all", "--name=" + name);
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(pb.start().getInputStream()))) {
@@ -96,7 +96,7 @@ public class IskanderusController {
 		/**
 		 * проверяет новые подключенные устройва и отключенные устройства
 		 */
-		public void check() {
+		private void check() {
 			//получаем список устройств, подключенных в данный момент
 			String[] portNames = SerialPortList.getPortNames();
 			Set<String> setNow = new HashSet<>();//множество ардуин, подключенных сейчас
