@@ -3,6 +3,8 @@ package org.bgpu.rasberry_pi.core;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Server {
 
@@ -11,12 +13,17 @@ public class Server {
 	 */
 	private static IskanderusController ic = new IskanderusController();
 	
-	public static void main(String... args) {
+	/**
+	 * логгер
+	 */
+	private static Logger LOGGER = Logger.getLogger(Server.class.getName());
+	
+	public static void main(String... args) {	
 		try {
-			System.out.println("starting server...");
+			Server.LOGGER.log(Level.INFO, "starting server...");
 			@SuppressWarnings("resource")
 			ServerSocket ss = new ServerSocket(1010);
-			System.out.println("started server");
+			Server.LOGGER.log(Level.INFO, "started server");
 			while (true) {
 				Socket socket = ss.accept();
 				new Thread(() -> {

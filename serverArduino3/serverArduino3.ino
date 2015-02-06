@@ -5,7 +5,7 @@ boolean end_command = false;
 String name_arduino = "arduino3";
 
 const int length_listCommands = 10;
-String listCommands[length_listCommands] = {"name3", "listCommand", "poweroff3", "ver3", "throat3", "neck3", "larmup3", "larmpit3",
+String listCommands[length_listCommands] = {"name", "listCommand", "poweroff3", "ver3", "throat3", "neck3", "larmup3", "larmpit3",
   "lbicep3", "lspeed3"};
 
 void setup() {

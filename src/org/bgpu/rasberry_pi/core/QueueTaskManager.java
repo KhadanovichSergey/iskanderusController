@@ -32,25 +32,47 @@ public class QueueTaskManager {
 	private Worker worker = new Worker();
 	
 	/**
-	 * создает очередь задачь к данному portManager
-	 * @param newPortManager объект, к которому нужно создать очередь задачь
+	 * id устройства
 	 */
-	public QueueTaskManager(PortManager newPortManager) {
+	private String idDevice;
+	
+	/**
+	 * имя сервера, заданное программно
+	 */
+	private String programmNameDevice;
+	
+	/**
+	 * создает очередь задачь к данному portManager
+	 * @param newPortManager объект, к которому нужно создать очередь задач
+	 * @param id id устройства
+	 */
+	public QueueTaskManager(PortManager newPortManager, String id) {
 		portManager = newPortManager;
-		portManager.openPort();
-		new Thread(worker).start();
+		init(id);
 	}
 	
 	/**
-	 * создает очередь задач к порту с данным именем
+	 * создает очередь задачь к порту с именем portName
 	 * @param portName имя порта, к которому нужно создать очередь задач
+	 * @param id id устройства
 	 */
-	public QueueTaskManager(String portName) {
+	public QueueTaskManager(String portName, String id) {
 		portManager = new PortManager(portName);
-		portManager.openPort();
-		new Thread(worker).start();
+		init(id);
 	}
 	
+	private void init(String id) {
+		portManager.openPort();
+		programmNameDevice = portManager.work("name");
+		idDevice = id;
+	}
+	
+	/**
+	 * стартует внутренний выполнитель команд
+	 */
+	public void start() {
+		new Thread(worker).start();
+	}
 	/**
 	 * добавляет задачу в очередь задач
 	 * @param textCommand текст команды, который необходимо выполнить
@@ -95,13 +117,19 @@ public class QueueTaskManager {
 	}
 	
 	/**
-	 * возвращает имя порта, для которая выстроенная данная очередь
-	 * @return имя порта
+	 * возвращает вшитое имя устройства
+	 * @return имя устройства
 	 */
-	public String getPortName() {
-		synchronized (portManager) {
-			return portManager.getPortName();
-		}
+	public String getProgrammNameDevice() {
+		return programmNameDevice;
+	}
+	
+	/**
+	 * возвращает id оборудовая
+	 * @return
+	 */
+	public String getIdDevice() {
+		return idDevice;
 	}
 	
 	/**

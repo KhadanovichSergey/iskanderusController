@@ -8,10 +8,10 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jssc.SerialPortList;
 
@@ -27,9 +27,9 @@ public class IskanderusController {
 	private Hashtable<String, QueueTaskManager> table = new Hashtable<>();
 	
 	/**
-	 * список имен портор, которые уже подключенны
+	 * список id устройств, которые уже были подключенны
 	 */
-	private ArrayList<String> listPortNames = new ArrayList<>();
+	private ArrayList<String> listIdDevice = new ArrayList<>();
 	
 	public IskanderusController() {
 		new Thread(new Finder()).start();
@@ -70,20 +70,31 @@ public class IskanderusController {
 	class Finder implements Runnable {
 		
 		/**
-		 * метод проверят ардуино ли это
-		 * @param name имя устройства (пример, /dev/ttyACA0)
-		 * @return true - если данное устройство ардуина, false - если нет
+		 * шаблон, для почения id устройства(это единственный способ отличить устройства)
 		 */
-		private boolean isArduino(String name) {
-			boolean result = false;
+		private Pattern pattern = Pattern.compile("^.*ID_SERIAL_SHORT=(?<idDevice>[a-zA-z0-9]+).*");
+		
+		/**
+		 * метод проверят ардуино ли это и возвращает пару, где
+		 * p.result (true, false) - ардиуно ли это или нет
+		 * p.id - id устройства
+		 * @param name имя устройства (пример, /dev/ttyACA0)
+		 * @return объект Pair
+		 */
+		private Pair isArduino(String name) {
+			Pair p = new Pair();
 			ProcessBuilder pb = new ProcessBuilder("udevadm", "info", "--query=all", "--name=" + name);
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(pb.start().getInputStream()))) {
 				String str = null;
-				while (!result && (str = reader.readLine()) != null)
+				while ((str = reader.readLine()) != null) {
 					if (str.toLowerCase().contains("arduino"))
-						result = true;
+						p.result = true;
+					Matcher m = pattern.matcher(str);
+					if (m.matches())
+						p.id = m.group("idDevice");
+				}
 			} catch(IOException e) {e.printStackTrace();}
-			return result;
+			return p;
 		}
 		
 		@Override
@@ -98,46 +109,57 @@ public class IskanderusController {
 		 * проверяет новые подключенные устройва и отключенные устройства
 		 */
 		private void check() {
-			//получаем список устройств, подключенных в данный момент
+			//получаем список имен портов, доступных в данный момент
 			String[] portNames = SerialPortList.getPortNames();
-			Set<String> setNow = new HashSet<>();//множество ардуин, подключенных сейчас
-			Set<String> setLast = new HashSet<>(listPortNames);//множество ардуин, которые были подключенны раньше
+			
+			//создаем список новых id устройств
+			ArrayList<String> newListIdDevice = new ArrayList<>();
 			
 			for(String portName : portNames) {
-				if (isArduino(portName)) {//если это ардуина
-					setNow.add(portName);//добавляем во множество (текущее)
-					boolean mark = false;//создан ли для нее буфер или нет
-					for(int i = 0; i < listPortNames.size() && !mark; ++i)
-						if (listPortNames.get(i).equalsIgnoreCase(portName)) {
-							mark = true;
-						}
-					if (!mark) {//если нет, то найденно новое устройство
-						System.out.println("Find new Arduino on port " + portName);
-						QueueTaskManager qtm = new QueueTaskManager(portName);
-						listPortNames.add(portName);//имя добавляется в список имен
+				Pair p = isArduino(portName);
+				if (p.result) {//если это ардуино
+					String name = p.id;//получаем ее id
+					newListIdDevice.add(name);
+					if (!listIdDevice.contains(name)) {// если этого устройства раньше не было
+						QueueTaskManager qtm = new QueueTaskManager(portName, name);
+						//добавить его команды в хэш
 						List<String> commandNames = qtm.getCommandNames();
 						for(String cn : commandNames)
 							table.put(cn, qtm);//команды добавляются в хэш
+						qtm.start();
+						System.out.println("add device with name (" + qtm.getProgrammNameDevice() + " -- " + name + ")");
 					}
 				}
 			}
 			
-			setLast.removeAll(setNow); //множетсов команд, которые были подключенны, а сейчас пропали
-			
-			//удаляем эти устройства из всех структур данных
-			for(String nameDevice : setLast) {
-				listPortNames.remove(nameDevice);//удаляем имя устройства
-				Enumeration<String> e = table.keys();//получаем все множество команд	
-				
-				while (e.hasMoreElements()) {
-					String command = e.nextElement();
-					QueueTaskManager qtm = table.get(command);
-					if (qtm.getPortName().equals(nameDevice)) {
-						table.remove(command, qtm);//удаляем команды этого устройства из хэша
+			for(String n : listIdDevice) {//просматриваем старый список устройств
+				if (!newListIdDevice.contains(n)) {
+					Enumeration<String> e = table.keys();
+					String pnd = "";
+					while (e.hasMoreElements()) {
+						String command = e.nextElement();
+						QueueTaskManager qtm = table.get(command);
+						if (qtm.getIdDevice().equals(n)) {
+							pnd = qtm.getProgrammNameDevice();
+							table.remove(command, qtm);//удаляем команды этого устройства из хэша
+						}
 					}
+					System.out.println("delete device with name (" + pnd + " -- " + n + ")");
 				}
-				System.out.println("delete device " + nameDevice);
 			}
+			
+			listIdDevice = newListIdDevice; //заменяем старый список id устройств на новый список
+		}
+		
+		/**
+		 * класс пара, result - ардуино ли это устройство
+		 * id - если это ардуино, то тут ее id
+		 * @author bazinga
+		 *
+		 */
+		class Pair {
+			public Boolean result = false;
+			public String id = "";
 		}
 	}
 }
