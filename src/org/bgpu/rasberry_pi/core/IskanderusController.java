@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,8 +19,6 @@ import jssc.SerialPortList;
  * @author bzinga
  */
 public class IskanderusController {
-	
-	private static Logger LOGGER = Logger.getLogger(IskanderusController.class.getName());
 	
 	/**
 	 * таблица ассоциаций названия команды с очередью на устройство, которое
@@ -55,9 +51,9 @@ public class IskanderusController {
 			
 			if (qtm != null) {//если задача распознана
 				qtm.addTask(textCommand, newSocket);
-				LOGGER.log(Level.INFO, "command is recognized : " + textCommand);
+				System.out.println("command is recognized : " + textCommand);
 			} else {//устройство, обрабатывающее эту задачу не найденно
-				LOGGER.log(Level.INFO, "command not found");
+				System.out.println("command not found");
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(newSocket.getOutputStream()));
 				writer.write("command not found\n");
 				writer.flush();
@@ -131,7 +127,7 @@ public class IskanderusController {
 						for(String cn : commandNames)
 							table.put(cn, qtm);//команды добавляются в хэш
 						qtm.start();
-						LOGGER.log(Level.INFO, "add device with name (" + qtm.getProgrammNameDevice() + " -- " + name + ")");
+						System.out.println("add device with name (" + qtm.getProgrammNameDevice() + " -- " + name + ")");
 					}
 				}
 			}
@@ -148,7 +144,7 @@ public class IskanderusController {
 							table.remove(command, qtm);//удаляем команды этого устройства из хэша
 						}
 					}
-					LOGGER.log(Level.INFO, "delete device with name (" + pnd + " -- " + n + ")");
+					System.out.println("delete device with name (" + pnd + " -- " + n + ")");
 				}
 			}
 			
