@@ -9,7 +9,7 @@ String listCommands[length_listCommands] = {"name", "listCommand", "poweroff1", 
   "lbicep1", "lspeed1"};
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(38400);
     Serial.flush();
 }
 
@@ -39,10 +39,10 @@ void runCommand(String _command) {
 
 
 void doSomeThing(String _command) {
-     if (command == listCommands[0]) Serial.print(name_arduino + ";");
-     else if (command == listCommands[1]) {
+     if (_command == listCommands[0]) Serial.print(name_arduino + ";");
+     else if (_command == listCommands[1]) {
          String answer = "";
-         for(int i = 0; i < length_listCommands - 1; i++)
+         for(int i = 2; i < length_listCommands - 1; i++)
              answer += listCommands[i] + ",";
          answer += listCommands[length_listCommands - 1] + ";";
          Serial.print(answer);

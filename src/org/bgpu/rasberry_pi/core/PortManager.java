@@ -55,7 +55,7 @@ public class PortManager {
 		try {
 			serialPort.openPort();
 			Thread.sleep(sleep);
-			serialPort.setParams(9600, 8, 1, 0);
+			serialPort.setParams(38400, 8, 1, 0);
 			serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
             serialPort.addEventListener(serialReader);
             
