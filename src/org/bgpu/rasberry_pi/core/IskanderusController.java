@@ -51,9 +51,7 @@ public class IskanderusController {
 			
 			if (qtm != null) {//если задача распознана
 				qtm.addTask(textCommand, newSocket);
-//				System.out.println("command is recognized : " + textCommand);
 			} else {//устройство, обрабатывающее эту задачу не найденно
-//				System.out.println("command not found");
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(newSocket.getOutputStream()));
 				writer.write("command not found\n");
 				writer.flush();

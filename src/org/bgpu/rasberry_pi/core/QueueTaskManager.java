@@ -81,7 +81,6 @@ public class QueueTaskManager {
 		synchronized (tasks) {
 			tasks.add(new Task(textCommand, socket));
 		}
-//		System.out.println("worker.resume()");
 		worker.resume();
 	}
 	
