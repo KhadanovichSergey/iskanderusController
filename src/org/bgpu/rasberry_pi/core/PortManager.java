@@ -7,7 +7,8 @@ import jssc.SerialPortException;
 
 /**
  * осуществляет передачу сообщений между arduino и raspberry pi
- * сообщения разделяются separator
+ * сообщения представляют собой простую строку, которая внутри метода перед отправкой
+ * оборачивается в separators и после чтения ответа эти же separators отбрасываются
  * @author bazinga
  */
 public class PortManager {
@@ -28,9 +29,9 @@ public class PortManager {
 	private int sleep = 1000;
 	
 	/**
-	 * разделитель сообщений
+	 * разделители сообщений
 	 */
-	private char separator = ';';
+	private String[] separators = {"[", "]"};
 	
 	/**
 	 * семафор
@@ -81,9 +82,8 @@ public class PortManager {
 	 */
 	public String work(String commandTo) {
 		String result = "";
-		serialReader.clear();
 		try {
-			serialPort.writeBytes((commandTo + separator).getBytes());
+			serialPort.writeBytes((separators[0] + commandTo + separators[1]).getBytes());
 			synchronized (obj) {
 	    		obj.wait();
 	    	}
@@ -101,50 +101,40 @@ public class PortManager {
 		 * данные, которые считываются с arduino
 		 */
 		private String answer = "";
+		
+		/**
+		 * началась ли команда
+		 */
+		private boolean start = false;
 
 		@Override
 		public void serialEvent(SerialPortEvent spe) {
 			if (spe.isRXCHAR()) {//если пришли символы
 				try {
-					//считать все что есть на порту
-					answer += new String(serialPort.readBytes(spe.getEventValue()));
-					//если ответ пришел полностью
-					if (ready()) {
-						//возобновляем действие метода run()
+					String c = new String(serialPort.readBytes(1));
+					if (c.equals(separators[0])) {
+						start = true;//команда началась
+						answer = "";//очистить буфет
+					} else if (c.equals(separators[1]) && start) {
+						start = false;
 						synchronized (obj) {
 							obj.notify();
 						}
+					} else if (start) {
+						answer += c;
 					}
 				} catch(SerialPortException ex) {ex.printStackTrace();}
 			}
 		}
 		
 		/**
-		 * пришел ли ответ полностью
-		 * @return true [false]
-		 */
-		private boolean ready() {
-			return !answer.equals("") && answer.charAt(answer.length() - 1) == separator;
-		}
-		
-		/**
 		 * возвращет ответ с arduino
-		 * данные методом можно пользоваться только если ready() возвращает true
-		 * иначе getAnswer() вернет не полный ответ с arduino
-		 * разделитель отбрасывается внутри метода, отбрасывать последний символ самостоятельно
-		 * не нужно
+		 * разделитель отбрасывается внутри метода
+		 * отбрасывать первый и последние символы не нужно
 		 * @return
 		 */
 		public String getAnswer() {
-			return answer.substring(0, answer.length() - 1);
-		}
-		
-		/**
-		 * очищает все данные, которые могли быть прочитанны...
-		 * этот метод обезательно должен быть вызван до того как писать данные в порт
-		 */
-		public void clear() {
-			answer = "";
+			return answer;
 		}
 	}
 }

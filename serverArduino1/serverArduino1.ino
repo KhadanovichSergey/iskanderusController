@@ -1,6 +1,6 @@
 String command = "";
-boolean end_command = false;
-
+boolean start_command = false;
+boolean evailable = false;
 
 String name_arduino = "arduino1";
 
@@ -13,40 +13,46 @@ void setup() {
     Serial.flush();
 }
 
-void loop() {
-     if (end_command) {
-         command.replace(";", "");
-         doSomeThing(command);
-         
-         command = "";
-         end_command = false;
+void loop() {}
+
+void spSent(String s) {
+    Serial.print("[" + s + "]");
+}
+void spRead() {
+      while (Serial.available() > 0 && !evailable) {
+          char c = (char)Serial.read();
+          if (c == '[') {
+              start_command = true;
+              command = "";
+              evailable = false;
+          } else if (c == ']' && start_command) {
+              evailable = true;
+              start_command = false;
+              break;
+          } else {
+              if (start_command)
+                  command += c; 
+          }
      }
 }
 
 void serialEvent() {
-     while (Serial.available()) {
-          char c = (char)Serial.read();
-          command += c;
-          if (c == ';')
-              end_command = true;
+     spRead();
+     if (evailable) {
+         doSomeThing(); 
+         start_command = evailable = false;
      }
 }
 
-void runCommand(String _command) {
-    //выполнение команды
-    Serial.print(_command + " - return from " + name_arduino + ";");
-}
-
-
-void doSomeThing(String _command) {
-     if (_command == listCommands[0]) Serial.print(name_arduino + ";");
-     else if (_command == listCommands[1]) {
+void doSomeThing() {
+     if (command == listCommands[0]) spSent(name_arduino);
+     else if (command == listCommands[1]) {
          String answer = "";
          for(int i = 2; i < length_listCommands - 1; i++)
              answer += listCommands[i] + ",";
-         answer += listCommands[length_listCommands - 1] + ";";
-         Serial.print(answer);
+         answer += listCommands[length_listCommands - 1];
+         spSent(answer);
      } else {
-         runCommand(_command);
+         spSent(command + ", return from arduino with name " + name_arduino);
      }
 }
