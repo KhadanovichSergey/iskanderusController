@@ -1,5 +1,8 @@
 package org.bgpu.rasberry_pi.core;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -13,6 +16,7 @@ import jssc.SerialPortException;
  */
 public class PortManager {
 
+	private static final Logger LOGGER = LogManager.getFormatterLogger(PortManager.class);
 	/**
 	 * порт для чтения и записи данных 
 	 */
@@ -53,6 +57,7 @@ public class PortManager {
 	 * после вызова этого метода, устройство перезагружается (arduino)
 	 */
 	public void openPort() {
+		LOGGER.entry();
 		try {
 			serialPort.openPort();
 			Thread.sleep(sleep);
@@ -61,6 +66,7 @@ public class PortManager {
             serialPort.addEventListener(serialReader);
             
 		} catch(Exception e) {e.printStackTrace();}
+		LOGGER.exit();
 	}
 	
 	/**
@@ -68,9 +74,11 @@ public class PortManager {
 	 * после того как вызван этот метод, пользоваться методом work() нельзя.
 	 */
 	public void closePort() {
+		LOGGER.entry();
 		try {
 			serialPort.closePort();
 		} catch(SerialPortException spe) {spe.printStackTrace();}
+		LOGGER.exit();
 	}
 
 	/**
@@ -81,15 +89,19 @@ public class PortManager {
 	 * @return результат выполнения команды
 	 */
 	public String work(String commandTo) {
+		LOGGER.entry(commandTo);
 		String result = "";
 		try {
 			serialPort.writeBytes((separators[0] + commandTo + separators[1]).getBytes());
+			LOGGER.debug("written data to port : %s", separators[0] + commandTo + separators[1]);
+			LOGGER.debug("wait while answer didn't come");
 			synchronized (obj) {
 	    		obj.wait();
 	    	}
 			result = serialReader.getAnswer();
+			LOGGER.debug("answer has just came : %s", result);
 		} catch(Exception e) {e.printStackTrace();}
-		return result;
+		return LOGGER.exit(result);
 	}
 	
 	/**
@@ -112,16 +124,20 @@ public class PortManager {
 			if (spe.isRXCHAR()) {//если пришли символы
 				try {
 					String c = new String(serialPort.readBytes(1));
+					LOGGER.debug("to port came symbol : %s", c);
 					if (c.equals(separators[0])) {
+						LOGGER.debug("start answer from arduino");
 						start = true;//команда началась
 						answer = "";//очистить буфет
 					} else if (c.equals(separators[1]) && start) {
+						LOGGER.debug("stop answer from arduino");
 						start = false;
 						synchronized (obj) {
 							obj.notify();
 						}
 					} else if (start) {
 						answer += c;
+						LOGGER.debug("we sent part of answer : %s", answer);
 					}
 				} catch(SerialPortException ex) {ex.printStackTrace();}
 			}
@@ -134,7 +150,8 @@ public class PortManager {
 		 * @return
 		 */
 		public String getAnswer() {
-			return answer;
+			LOGGER.entry();
+			return LOGGER.exit(answer);
 		}
 	}
 }

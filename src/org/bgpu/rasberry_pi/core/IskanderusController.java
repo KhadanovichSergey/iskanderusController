@@ -13,12 +13,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import jssc.SerialPortList;
 
 /**
  * @author bzinga
  */
 public class IskanderusController {
+	
+	private static final Logger LOGGER = LogManager.getFormatterLogger(IskanderusController.class);
 	
 	/**
 	 * таблица ассоциаций названия команды с очередью на устройство, которое
@@ -41,23 +46,28 @@ public class IskanderusController {
 	 * @param newSocket
 	 */
 	public void addSocket(Socket newSocket) {
+		LOGGER.entry(newSocket);
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
 			String textCommand = reader.readLine();
+			LOGGER.debug("read full text command : %s, from socket's inputstream with address %s", textCommand, newSocket.getInetAddress());
 			int index = textCommand.indexOf(':');
 			String nameCommand = textCommand.substring(0, (index == -1) ? textCommand.length() : index);
-			
+			LOGGER.debug("find name of command - %s", nameCommand);
 			QueueTaskManager qtm = table.get(nameCommand);
 			
 			if (qtm != null) {//если задача распознана
 				qtm.addTask(textCommand, newSocket);
+				LOGGER.debug("find QueueTaskManager associated with the command");
 			} else {//устройство, обрабатывающее эту задачу не найденно
+				LOGGER.debug("don't find QueueTaskManager associated with the command");
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(newSocket.getOutputStream()));
 				writer.write("command not found\n");
 				writer.flush();
 				newSocket.close();
 			}
 		} catch(IOException ioe) {ioe.printStackTrace();}
+		LOGGER.exit();
 	}
 	
 	/**
