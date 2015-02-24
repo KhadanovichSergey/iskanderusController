@@ -1,11 +1,8 @@
 package org.bgpu.rasberry_pi.core;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -15,6 +12,8 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bgpu.rasberry_pi.structs.AnswerSeterable;
+import org.bgpu.rasberry_pi.structs.Pair;
 
 import jssc.SerialPortList;
 
@@ -23,6 +22,7 @@ import jssc.SerialPortList;
  */
 public class IskanderusController {
 	
+	@SuppressWarnings("unused")
 	private static final Logger LOGGER = LogManager.getFormatterLogger(IskanderusController.class);
 	
 	/**
@@ -36,38 +36,40 @@ public class IskanderusController {
 	 */
 	private ArrayList<String> listIdDevice = new ArrayList<>();
 	
-	public IskanderusController() {
+	/**
+	 * статичный объект контроллера
+	 * контроллер должен быть только один, самостоятельное создание этих объектов
+	 * может привести к непредсказуемому поведению программы...
+	 */
+	private static final IskanderusController ISKANDERUS_CONTROLLER = new IskanderusController();
+	
+	private IskanderusController() {
 		new Thread(new Finder()).start();
 	}
 	
 	/**
-	 * добавляет задачу из сокета в очередь к устройству
-	 * если задача не распознана, отвечает 'command not found' и закрывает сокет
-	 * @param newSocket
+	 * возвращает объект контроллера
+	 * @return iskanderusController instance
 	 */
-	public void addSocket(Socket newSocket) {
-		LOGGER.entry(newSocket);
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
-			String textCommand = reader.readLine();
-			LOGGER.debug("read full text command : %s, from socket's inputstream with address %s", textCommand, newSocket.getInetAddress());
-			int index = textCommand.indexOf(':');
-			String nameCommand = textCommand.substring(0, (index == -1) ? textCommand.length() : index);
-			LOGGER.debug("find name of command - %s", nameCommand);
-			QueueTaskManager qtm = table.get(nameCommand);
-			
-			if (qtm != null) {//если задача распознана
-				qtm.addTask(textCommand, newSocket);
-				LOGGER.debug("find QueueTaskManager associated with the command");
-			} else {//устройство, обрабатывающее эту задачу не найденно
-				LOGGER.debug("don't find QueueTaskManager associated with the command");
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(newSocket.getOutputStream()));
-				writer.write("command not found\n");
-				writer.flush();
-				newSocket.close();
-			}
-		} catch(IOException ioe) {ioe.printStackTrace();}
-		LOGGER.exit();
+	public static IskanderusController getIskanderusController() {
+		return ISKANDERUS_CONTROLLER;
+	}
+	
+	/**
+	 * распределяет команду между очередями
+	 * из текста команды получается имя комнады, по имени команды
+	 * определяется какая именно ардуина может выполнять такую команду и
+	 * команды устанавливается ей в очередь...
+	 * @param textCommand полный текст команды
+	 * @throws NullPointerException если команда не распознана
+	 */
+	public void switchCommand(String textCommand, AnswerSeterable as) throws NullPointerException {
+		int index = textCommand.indexOf(':');
+		String nameCommand = textCommand.substring(0, (index == -1) ? textCommand.length() : index);
+		QueueTaskManager qtm = table.get(nameCommand);
+		
+		//установка команды в очередь к соответствующей ардуине
+		qtm.addPair(new Pair<String, AnswerSeterable>(textCommand, as));
 	}
 	
 	/**
@@ -84,22 +86,23 @@ public class IskanderusController {
 		
 		/**
 		 * метод проверят ардуино ли это и возвращает пару, где
-		 * p.result (true, false) - ардиуно ли это или нет
-		 * p.id - id устройства
+		 * p.key (true, false) - ардиуно ли это или нет
+		 * p.value - id устройства
 		 * @param name имя устройства (пример, /dev/ttyACA0)
 		 * @return объект Pair
 		 */
-		private Pair isArduino(String name) {
-			Pair p = new Pair();
+		private Pair<Boolean, String> isArduino(String name) {
+			Pair<Boolean, String> p = new Pair<>();
+			p.setKey(false);
 			ProcessBuilder pb = new ProcessBuilder("udevadm", "info", "--query=all", "--name=" + name);
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(pb.start().getInputStream()))) {
 				String str = null;
 				while ((str = reader.readLine()) != null) {
 					if (str.toLowerCase().contains("arduino"))
-						p.result = true;
+						p.setKey(true);
 					Matcher m = pattern.matcher(str);
 					if (m.matches())
-						p.id = m.group("idDevice");
+						p.setValue(m.group("idDevice"));
 				}
 			} catch(IOException e) {e.printStackTrace();}
 			return p;
@@ -124,9 +127,9 @@ public class IskanderusController {
 			ArrayList<String> newListIdDevice = new ArrayList<>();
 			
 			for(String portName : portNames) {
-				Pair p = isArduino(portName);
-				if (p.result) {//если это ардуино
-					String name = p.id;//получаем ее id
+				Pair<Boolean, String> p = isArduino(portName);
+				if (p.getKey()) {//если это ардуино
+					String name = p.getValue();//получаем ее id
 					newListIdDevice.add(name);
 					if (!listIdDevice.contains(name)) {// если этого устройства раньше не было
 						QueueTaskManager qtm = new QueueTaskManager(portName, name);
@@ -157,17 +160,6 @@ public class IskanderusController {
 			}
 			
 			listIdDevice = newListIdDevice; //заменяем старый список id устройств на новый список
-		}
-		
-		/**
-		 * класс пара, result - ардуино ли это устройство
-		 * id - если это ардуино, то тут ее id
-		 * @author bazinga
-		 *
-		 */
-		class Pair {
-			public Boolean result = false;
-			public String id = "";
 		}
 	}
 }

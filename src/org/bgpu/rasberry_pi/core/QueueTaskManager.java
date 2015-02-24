@@ -1,9 +1,5 @@
 package org.bgpu.rasberry_pi.core;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +7,8 @@ import java.util.StringTokenizer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bgpu.rasberry_pi.structs.AnswerSeterable;
+import org.bgpu.rasberry_pi.structs.Pair;
 
 /**
  * буферезированная очередь к порту
@@ -28,7 +26,7 @@ public class QueueTaskManager {
 	/**
 	 * очередь задачь, которые необходимо выполнить
 	 */
-	private LinkedList<Task> tasks = new LinkedList<>();
+	private LinkedList<Pair<String, AnswerSeterable>> tasks = new LinkedList<>();
 	
 	/**
 	 * поток, отвечающий за выполнение команд
@@ -93,11 +91,11 @@ public class QueueTaskManager {
 	 * @param textCommand текст команды, который необходимо выполнить
 	 * @param socket сокет, в который нужно отправить ответ
 	 */
-	public void addTask(String textCommand, Socket socket) {
-		LOGGER.entry(textCommand, socket);
+	public void addPair(Pair<String, AnswerSeterable> pair) {
+		LOGGER.entry(pair);
 		synchronized (tasks) {
 			LOGGER.debug("add task with command's text to queue to device with name %s", programmNameDevice);
-			tasks.add(new Task(textCommand, socket));
+			tasks.add(pair);
 		}
 		LOGGER.debug("resume woker command");
 		worker.resume();
@@ -108,21 +106,12 @@ public class QueueTaskManager {
 	 * выполняет задачу из очереди
 	 * @param task задача, которую нужно выполнить
 	 */
-	private void work(Task task) {
-		LOGGER.entry(task);
+	private void work(Pair<String, AnswerSeterable> pair) {
+		LOGGER.entry(pair);
 		
 		synchronized (portManager) {
-			LOGGER.debug("send command : %s to %s", task.getTextCommand(), programmNameDevice);
-			String resultWorkCommand = portManager.work(task.getTextCommand());
-			LOGGER.debug("came result : %s from %s", resultWorkCommand, programmNameDevice);
-			try {
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(task.getSocket().getOutputStream()));
-				writer.write(resultWorkCommand + "\n");
-				LOGGER.debug("send result to socket's outputStream with address : %s", task.getSocket().getInetAddress());
-				writer.flush();
-				task.getSocket().close();
-				LOGGER.debug("close socket with address : %s", task.getSocket().getInetAddress());
-			} catch(IOException ioe) {ioe.printStackTrace();}
+			String resultWorkCommand = portManager.work(pair.getKey());
+			pair.getValue().setAnswer(resultWorkCommand);
 		}
 		
 		LOGGER.exit();
@@ -161,45 +150,6 @@ public class QueueTaskManager {
 	public String getIdDevice() {
 		LOGGER.entry();
 		return LOGGER.exit(idDevice);
-	}
-	
-	/**
-	 * задача, содержит текст команды, которую необходимо выполнить и сокет для отправки
-	 * результата выполнения команды
-	 * @author bazinga
-	 *
-	 */
-	private class Task {
-		/**
-		 * текст команды
-		 */
-		private String textCommand;
-		
-		/**
-		 * сокет, с которого пришел запрос на выполнение команды
-		 */
-		private Socket socket;
-		
-		public Task(String textCommand, Socket socket) {
-			this.textCommand = textCommand;
-			this.socket = socket;
-		}
-		
-		/**
-		 * возвращает текст команды
-		 * @return текст команды
-		 */
-		public String getTextCommand() {
-			return textCommand;
-		}
-		
-		/**
-		 * возращает сокет, в который нужно отправить ответ
-		 * @return сокет
-		 */
-		public Socket getSocket() {
-			return socket;
-		}
 	}
 	
 	/**
