@@ -10,12 +10,28 @@ import java.net.Socket;
 import org.bgpu.rasberry_pi.core.IskanderusController;
 import org.bgpu.rasberry_pi.structs.AnswerSeterable;
 
+/**
+ * класс, получающий данные из сокета
+ * принимающий ответствнные действия по анализую данные и выполнению команд, отправке результата
+ * @author bazinga
+ *
+ */
 public class SocketListener implements Runnable, AnswerSeterable {
 
+	/**
+	 * сокет с которого читаются данные и в который отправляются результаты
+	 */
 	private Socket socket;
 	
+	/**
+	 * объект для преостановки потока, пока не будет получен ответ
+	 */
 	private Object obj = new Object();
 	
+	/**
+	 * слот
+	 * сюда помещается ответ от QueueTaskManager instance
+	 */
 	private String answer;
 	
 	public SocketListener(Socket socket) {
@@ -24,7 +40,7 @@ public class SocketListener implements Runnable, AnswerSeterable {
 	
 	@Override
 	public void run() {
-		read();
+		analize(recieve());
 		try {
 			socket.close();
 		} catch (IOException e) {
@@ -34,39 +50,67 @@ public class SocketListener implements Runnable, AnswerSeterable {
 
 	@Override
 	public void setAnswer(String answer) {
-		this.answer = answer;
+		this.answer = answer;//устанавливает текст в слот
 		synchronized (obj) {
-			obj.notify();
+			obj.notify();//будит поток
 		}
 	}
 	
-	private void read() {
-		
+	/**
+	 * читает команды из socket's inputStream
+	 * @return text
+	 */
+	private String recieve() {
+		String result = null;
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			String text = reader.readLine();
-			if (text.contains("run command")) {
-				try {
-					IskanderusController.getIskanderusController().switchCommand(text.replace("run command", "").trim(), this);
-					synchronized (obj) {
-						obj.wait();
-					}
-					sendAnswer(answer);
-				} catch (NullPointerException npe) {
-					sendAnswer("command not found");
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				
-			}
+			result = reader.readLine();
 		} catch (IOException ioe) {ioe.printStackTrace();}
+		return result;
 	}
 	
-	private void sendAnswer(String answer) {
+	/**
+	 * отправляет данные обратно в socket's outputStream
+	 * @param str данные которые нужно отправить
+	 */
+	private void send(String str) {
 		try {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			writer.write(answer + "\n");
+			writer.write(str + "\n");
 			writer.flush();
 		} catch (IOException ioe) {ioe.printStackTrace();}
 	}
+	
+	/**
+	 * главные метод, по анализу текста пришедшего сообщения
+	 * ответственный за принятие решения на данном уровне
+	 * @param text
+	 */
+	private void analize(String text) {
+		if (text.contains("run command")) {
+			
+		}
+	}
+	
+//	private void read() {
+//		
+//		try {
+//			
+//			String text = reader.readLine();
+//			if (text.contains("run command")) {
+//				try {
+//					IskanderusController.getIskanderusController().switchCommand(text.replace("run command", "").trim(), this);
+//					synchronized (obj) {
+//						obj.wait();
+//					}
+//					sendAnswer(answer);
+//				} catch (NullPointerException npe) {
+//					sendAnswer("command not found");
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//				
+//			}
+//		} 
+//	}
 }
