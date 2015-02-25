@@ -6,9 +6,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Hashtable;
 
 import org.bgpu.rasberry_pi.core.IskanderusController;
+import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
+import org.bgpu.rasberry_pi.structs.Actionable;
 import org.bgpu.rasberry_pi.structs.AnswerSeterable;
+import org.bgpu.rasberry_pi.structs.Command;
 
 /**
  * класс, получающий данные из сокета
@@ -40,12 +44,10 @@ public class SocketListener implements Runnable, AnswerSeterable {
 	
 	@Override
 	public void run() {
-		analize(recieve());
 		try {
+			new Analizer().analize(recieve());
 			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e) {e.printStackTrace();}
 	}
 
 	@Override
@@ -81,36 +83,43 @@ public class SocketListener implements Runnable, AnswerSeterable {
 		} catch (IOException ioe) {ioe.printStackTrace();}
 	}
 	
-	/**
-	 * главные метод, по анализу текста пришедшего сообщения
-	 * ответственный за принятие решения на данном уровне
-	 * @param text
-	 */
-	private void analize(String text) {
-		if (text.contains("run command")) {
+	class Analizer {
+		
+		private Hashtable<String, Actionable> hash = new Hashtable<>();
+		
+		public Analizer() {
+			hash.put("run command", (s) -> {
+				try {
+					runCommand(s, "run command");
+					send(answer);
+				} catch (WrongFormatCommandException wfce) {
+					send("wrong format command " + s);
+				} catch (NullPointerException npe) {
+					send("command not found " + s);
+				}
+			});
+			hash.put("run script", (s) -> {
+				
+			});
+			hash.put("save script", (s) -> {
+				
+			});
 			
 		}
+		
+		public void analize(String text) throws InterruptedException {
+			for(String str : hash.keySet())
+				if (text.contains(str))
+					hash.get(str).action(text);
+		}
+		
+		private void runCommand(String text, String subtext)
+				throws NullPointerException, WrongFormatCommandException, InterruptedException {
+			Command c = new Command(text.replace(subtext, "").trim());
+			IskanderusController.instance().switchCommand(c, SocketListener.this);
+			synchronized (obj) {
+				obj.wait();
+			}
+		}
 	}
-	
-//	private void read() {
-//		
-//		try {
-//			
-//			String text = reader.readLine();
-//			if (text.contains("run command")) {
-//				try {
-//					IskanderusController.getIskanderusController().switchCommand(text.replace("run command", "").trim(), this);
-//					synchronized (obj) {
-//						obj.wait();
-//					}
-//					sendAnswer(answer);
-//				} catch (NullPointerException npe) {
-//					sendAnswer("command not found");
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-//				
-//			}
-//		} 
-//	}
 }

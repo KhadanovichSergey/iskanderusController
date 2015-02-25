@@ -8,6 +8,7 @@ import java.util.StringTokenizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bgpu.rasberry_pi.structs.AnswerSeterable;
+import org.bgpu.rasberry_pi.structs.Command;
 import org.bgpu.rasberry_pi.structs.Pair;
 
 /**
@@ -26,7 +27,7 @@ public class QueueTaskManager {
 	/**
 	 * очередь задачь, которые необходимо выполнить
 	 */
-	private LinkedList<Pair<String, AnswerSeterable>> tasks = new LinkedList<>();
+	private LinkedList<Pair<Command, AnswerSeterable>> tasks = new LinkedList<>();
 	
 	/**
 	 * поток, отвечающий за выполнение команд
@@ -91,7 +92,7 @@ public class QueueTaskManager {
 	 * @param textCommand текст команды, который необходимо выполнить
 	 * @param socket сокет, в который нужно отправить ответ
 	 */
-	public void addPair(Pair<String, AnswerSeterable> pair) {
+	public void addPair(Pair<Command, AnswerSeterable> pair) {
 		LOGGER.entry(pair);
 		synchronized (tasks) {
 			LOGGER.debug("add task with command's text to queue to device with name %s", programmNameDevice);
@@ -106,11 +107,11 @@ public class QueueTaskManager {
 	 * выполняет задачу из очереди
 	 * @param task задача, которую нужно выполнить
 	 */
-	private void work(Pair<String, AnswerSeterable> pair) {
+	private void work(Pair<Command, AnswerSeterable> pair) {
 		LOGGER.entry(pair);
 		
 		synchronized (portManager) {
-			String resultWorkCommand = portManager.work(pair.getKey());
+			String resultWorkCommand = portManager.work(pair.getKey().toString());
 			pair.getValue().setAnswer(resultWorkCommand);
 		}
 		

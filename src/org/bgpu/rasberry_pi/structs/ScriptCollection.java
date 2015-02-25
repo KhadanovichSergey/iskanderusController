@@ -10,12 +10,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.bgpu.rasberry_pi.exception.ScriptIsEmptyException;
+import org.bgpu.rasberry_pi.exception.ScriptNotFoundException;
+import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
+
 public class ScriptCollection {
 	
 	/**
 	 * имя файла, где хранится коллекция
 	 */
-	private String fileName = "scripts";
+	private static final String FILE_NAME = ConfigLoader.instance().getValue("pathToFileScripts");
 	
 	/**
 	 * множество скриптов, которые уже были добавленны
@@ -36,7 +40,14 @@ public class ScriptCollection {
 	}
 	
 	private ScriptCollection() {
-		load(fileName);
+		try {
+			checkFile(ScriptCollection.FILE_NAME);
+			load(ScriptCollection.FILE_NAME);
+		} catch (WrongFormatCommandException ex) {
+			scripts.clear();
+			System.out.println("can't read file " + ScriptCollection.FILE_NAME);
+			ex.printStackTrace();
+		} catch (IOException ioe) {ioe.printStackTrace();}
 	}
 	
 	/**
@@ -44,19 +55,19 @@ public class ScriptCollection {
 	 * @param newScript новый скрипт
 	 * @throws IllegalArgumentException если скрипт, не создержит не одной команды, то exception
 	 */
-	public void add(Script newScript) throws IllegalArgumentException {
+	public synchronized void add(Script newScript) throws ScriptIsEmptyException {
 		if (newScript.size() <= 0)
-			throw new IllegalArgumentException("script must contain though once command");
+			throw new ScriptIsEmptyException();
 		scripts.add(newScript);
-		unload(fileName);
+		unload(ScriptCollection.FILE_NAME);
 	}
 	
 	/**
 	 * загрузает коллекцию скриптов из файла
 	 * @param fileName имя файла
 	 */
-	public synchronized void load(String fileName) {
-		try (BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)))) {
+	private void load(String fileName) throws WrongFormatCommandException {
+		try (BufferedReader reader = new BufferedReader(new FileReader(new File(ScriptCollection.FILE_NAME)))) {
 			scripts.clear();
 			String line = null;
 			while ((line = reader.readLine()) != null) {
@@ -73,10 +84,33 @@ public class ScriptCollection {
 	 * выгружает коллекцию скриптов в файл
 	 * @param fileName
 	 */
-	public synchronized void unload(String fileName) {
+	private void unload(String fileName) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)))) {
 			for(Script s : scripts)
-				System.out.println(s);
+				writer.write(s + System.getProperty("line.separator"));
+			writer.flush();
 		} catch (IOException ex) {ex.printStackTrace();}
+	}
+	
+	/**
+	 * проверяет а есть ли такой файл, если нет то создает его
+	 * @param fileName имя файла
+	 * @throws IOException нельзя создать файл
+	 */
+	private void checkFile(String fileName) throws IOException {
+		File file = new File(fileName);
+		if (!file.exists()) {
+			System.out.println("file " + ScriptCollection.FILE_NAME + " doesn't exists");
+			file.createNewFile();
+			System.out.println("created file " + ScriptCollection.FILE_NAME);
+		}
+			
+	}
+	
+	public synchronized Script getScript(String nameScript) throws ScriptNotFoundException {
+		for(Script s : scripts)
+			if (s.getName().equals(nameScript))
+				return s;
+		throw new ScriptNotFoundException(nameScript);
 	}
 }

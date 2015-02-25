@@ -2,6 +2,7 @@ package org.bgpu.rasberry_pi.core;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bgpu.rasberry_pi.structs.ConfigLoader;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -30,12 +31,13 @@ public class PortManager {
 	/**
 	 * задержка после открытая порта
 	 */
-	private int sleep = 1000;
+	private int sleep = Integer.parseInt(ConfigLoader.instance().getValue("sleepAfterOpenPort"));
 	
 	/**
 	 * разделители сообщений
 	 */
-	private String[] separators = {"[", "]"};
+	private String[] separators = {ConfigLoader.instance().getValue("startSeparator"),
+			ConfigLoader.instance().getValue("stopSeparator")};
 	
 	/**
 	 * семафор
@@ -61,7 +63,11 @@ public class PortManager {
 		try {
 			serialPort.openPort();
 			Thread.sleep(sleep);
-			serialPort.setParams(38400, 8, 1, 0);
+			serialPort.setParams(
+					Integer.parseInt(ConfigLoader.instance().getValue("baudRate")),
+					Integer.parseInt(ConfigLoader.instance().getValue("dataBits")),
+					Integer.parseInt(ConfigLoader.instance().getValue("stopBits")),
+					Integer.parseInt(ConfigLoader.instance().getValue("parity")));
 			serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
             serialPort.addEventListener(serialReader);
             
