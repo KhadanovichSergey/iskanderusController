@@ -1,13 +1,14 @@
 package org.bgpu.rasberry_pi.structs;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * скрипт - последовательность команд для разлиных ардуин
  * @author bazinga
  *
  */
-public class Script {
+public class Script implements Iterable<Command>{
 
 	/**
 	 * имя скрипта
@@ -40,16 +41,8 @@ public class Script {
 	}
 	
 	/**
-	 * добавляет команду по ее текстовому представлению
-	 * @param textPresentationCommand текстовое представление команды
-	 */
-	public void addCommand(String textPresentationCommand) {
-		commands.add(new Command(textPresentationCommand));
-	}
-	
-	/**
 	 * возвращает строковое предсталение скрипта
-	 * имя команда1 команда2 ... командаN
+	 * имя_скрипта команда1 команда2 ... командаN
 	 */
 	@Override
 	public String toString() {
@@ -64,6 +57,27 @@ public class Script {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		return name.equals(((Script)obj).getName());
+		if (this == obj) return true;
+		if (obj instanceof Script) {
+			Script s = (Script) obj;
+			return s.getName().equals(name);
+		}
+		return false;
+	}
+
+	/**
+	 * итератор по списку команд в скрипте
+	 */
+	@Override
+	public Iterator<Command> iterator() {
+		return commands.iterator();
+	}
+	
+	/**
+	 * получить количество команд в скрипте
+	 * @return количество команд в скрипте
+	 */
+	public int size() {
+		return commands.size();
 	}
 }

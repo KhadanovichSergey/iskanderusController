@@ -13,6 +13,8 @@ public class Server {
 
 	public static void main(String... args) throws ClassNotFoundException {
 		Class.forName("org.bgpu.rasberry_pi.core.IskanderusController");
+		Class.forName("org.bgpu.rasberry_pi.structs.ScriptCollection");
+		
 		try {
 			LOGGER.info("Starting server...");
 			@SuppressWarnings("resource")

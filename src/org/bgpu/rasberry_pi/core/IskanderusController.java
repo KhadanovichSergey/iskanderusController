@@ -51,7 +51,7 @@ public class IskanderusController {
 	 * возвращает объект контроллера
 	 * @return iskanderusController instance
 	 */
-	public static IskanderusController getIskanderusController() {
+	public static IskanderusController instance() {
 		return ISKANDERUS_CONTROLLER;
 	}
 	
