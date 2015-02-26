@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+
 import org.bgpu.rasberry_pi.exception.ScriptIsEmptyException;
 import org.bgpu.rasberry_pi.exception.ScriptNotFoundException;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
@@ -19,7 +20,7 @@ public class ScriptCollection {
 	/**
 	 * имя файла, где хранится коллекция
 	 */
-	private static final String FILE_NAME = ConfigLoader.instance().getValue("pathToFileScripts");
+	private static final String DIR_NAME = ConfigLoader.instance().getValue("pathToDirWithScripts");
 	
 	/**
 	 * множество скриптов, которые уже были добавленны
@@ -40,14 +41,8 @@ public class ScriptCollection {
 	}
 	
 	private ScriptCollection() {
-		try {
-			checkFile(ScriptCollection.FILE_NAME);
-			load(ScriptCollection.FILE_NAME);
-		} catch (WrongFormatCommandException ex) {
-			scripts.clear();
-			System.out.println("can't read file " + ScriptCollection.FILE_NAME);
-			ex.printStackTrace();
-		} catch (IOException ioe) {ioe.printStackTrace();}
+		checkDirectory(ScriptCollection.DIR_NAME);
+		loadCollection(ScriptCollection.DIR_NAME);
 	}
 	
 	/**
@@ -59,54 +54,76 @@ public class ScriptCollection {
 		if (newScript.size() <= 0)
 			throw new ScriptIsEmptyException();
 		scripts.add(newScript);
-		unload(ScriptCollection.FILE_NAME);
+		unloadCollection(ScriptCollection.DIR_NAME);
 	}
-	
+
 	/**
-	 * загрузает коллекцию скриптов из файла
-	 * @param fileName имя файла
+	 * 
+	 * @param dirName
+	 * @throws WrongFormatCommandException
 	 */
-	private void load(String fileName) throws WrongFormatCommandException {
-		try (BufferedReader reader = new BufferedReader(new FileReader(new File(ScriptCollection.FILE_NAME)))) {
-			scripts.clear();
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				StringTokenizer tokenizer = new StringTokenizer(line);
-				Script script = new Script(tokenizer.nextToken());
-				while (tokenizer.hasMoreTokens())
-					script.addCommand(new Command(tokenizer.nextToken()));
-				scripts.add(script);
+	private void loadCollection(String dirName) {
+		File dir = new File(dirName);
+		File[] files = dir.listFiles((f) -> f.getName().endsWith(".script"));
+		scripts.clear();
+		for(File f : files)
+			try {
+				loadScript(f);
+			} catch (WrongFormatCommandException wfce) {
+				System.out.println("can't read file " + f.getName());
+				wfce.printStackTrace();
 			}
-		} catch (IOException ex) {ex.printStackTrace();}
 	}
 	
 	/**
-	 * выгружает коллекцию скриптов в файл
-	 * @param fileName
+	 * загружает скрипт из файла
+	 * @param file файл, откуда надо загрузить скрипт
+	 * @throws WrongFormatCommandException если файл не прочитался, команда в неправильном формате
 	 */
-	private void unload(String fileName) {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)))) {
-			for(Script s : scripts)
-				writer.write(s + System.getProperty("line.separator"));
-			writer.flush();
-		} catch (IOException ex) {ex.printStackTrace();}
+	private void loadScript(File file) throws WrongFormatCommandException {
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+			String line = reader.readLine();
+			StringTokenizer tokenizer = new StringTokenizer(line);
+			Script script = new Script(tokenizer.nextToken());
+			while (tokenizer.hasMoreTokens())
+				script.addCommand(new Command(tokenizer.nextToken()));
+			scripts.add(script);
+		} catch (IOException ioe) {ioe.printStackTrace();}
 	}
 	
 	/**
-	 * проверяет а есть ли такой файл, если нет то создает его
-	 * @param fileName имя файла
-	 * @throws IOException нельзя создать файл
+	 * выгружает все скрипты по отдельным файлам в директорию
+	 * @param dirName имя директории, в которую нужно записать все скрипты
 	 */
-	private void checkFile(String fileName) throws IOException {
-		File file = new File(fileName);
-		if (!file.exists()) {
-			System.out.println("file " + ScriptCollection.FILE_NAME + " doesn't exists");
-			file.createNewFile();
-			System.out.println("created file " + ScriptCollection.FILE_NAME);
+	private void unloadCollection(String dirName) {
+		for(Script s : scripts) {
+			try (BufferedWriter writer = new BufferedWriter(new FileWriter(ScriptCollection.DIR_NAME + "/" + s.getName() + ".script"))) {
+				writer.write(s.toString() + System.getProperty("line.separator"));
+				writer.flush();
+			} catch (IOException ioe) {ioe.printStackTrace();}
 		}
-			
 	}
 	
+	/**
+	 * проверяет наличие целевой директории
+	 * если ее нет, то она создается
+	 * @param dirName имя директории
+	 */
+	private void checkDirectory(String dirName) {
+		File file = new File(dirName);
+		if (!file.exists()) {
+			System.out.println("directory " + ScriptCollection.DIR_NAME+ " doesn't exists");
+			file.mkdirs();
+			System.out.println("created directory " + ScriptCollection.DIR_NAME);
+		}
+	}
+	
+	/**
+	 * возращает скрипт по по имени
+	 * @param nameScript имя скрипта
+	 * @return объект script
+	 * @throws ScriptNotFoundException если скрипта в коллекции нет
+	 */
 	public synchronized Script getScript(String nameScript) throws ScriptNotFoundException {
 		for(Script s : scripts)
 			if (s.getName().equals(nameScript))
