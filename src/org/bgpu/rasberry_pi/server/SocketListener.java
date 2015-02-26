@@ -180,6 +180,9 @@ public class SocketListener implements Runnable, AnswerSeterable {
 					listAction.get(i).getValue().accept(text);
 					mark = true;
 				}
+			if (!mark) {
+				send(" [ " + text + " ] is not a command of protocol");
+			}
 		}
 		
 		private void runCommand(Command c)
