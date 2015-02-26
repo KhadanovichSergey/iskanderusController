@@ -15,7 +15,7 @@ public class Command {
 	/**
 	 * регулярное выражение команды
 	 */
-	private Pattern pattern = Pattern.compile("^(?<nameCommand>[a-zA-Z0-9]+)(" + ConfigLoader.instance().getValue("separatorArguments") + "[0-9]+)*$");
+	private static final Pattern pattern = Pattern.compile("^(?<nameCommand>[a-zA-Z0-9]+)(" + ConfigLoader.instance().getValue("separatorArguments") + "[0-9]+)*$");
 	
 	/**
 	 * текстовое представление команды name:par1:par2:...:parN

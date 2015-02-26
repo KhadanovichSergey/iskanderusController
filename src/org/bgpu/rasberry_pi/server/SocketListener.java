@@ -6,16 +6,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.Hashtable;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 import org.bgpu.rasberry_pi.core.IskanderusController;
 import org.bgpu.rasberry_pi.exception.ScriptIsEmptyException;
 import org.bgpu.rasberry_pi.exception.ScriptNotFoundException;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
-import org.bgpu.rasberry_pi.structs.Actionable;
 import org.bgpu.rasberry_pi.structs.AnswerSeterable;
 import org.bgpu.rasberry_pi.structs.Command;
+import org.bgpu.rasberry_pi.structs.Pair;
 import org.bgpu.rasberry_pi.structs.Script;
 import org.bgpu.rasberry_pi.structs.ScriptCollection;
 
@@ -98,89 +100,95 @@ public class SocketListener implements Runnable, AnswerSeterable {
 		 * таблица ассоциаций между текстом, который входит в набор пришедший по сети
 		 * и действиями которые нужно сделать с этим текстом
 		 */
-		private Hashtable<String, Actionable> hash = new Hashtable<>();
+		
+		private ArrayList<Pair<Pattern, Consumer<String>>> listAction = new ArrayList<>();
 		
 		public Analizer() {
-			hash.put("run command", (s) -> {
-				//run command textPresentationCommand
-				try {
-					String textPC = s.replace("run command", "").trim();
-					//получили текстовое представление команды
-					runCommand(new Command(textPC));//выполнение команды
-					send("command " + textPC + " run succefull with answer = " + answer);//отправка результата
-				} catch (WrongFormatCommandException wfce) {
-					send("wrong format command " + s);
-				} catch (NullPointerException npe) {
-					send("command not found " + s);
-				}
-			});
-			hash.put("run script", (s) -> {
-				//s - full text
-				//run script script_name
-				String scriptName = s.replace("run script", "").trim(); //получили имя скрипта
-				try {
-					// есть ли такой скрипт в коллекции скриптов
-					Script script = ScriptCollection.instance().getScript(scriptName);
-					StringBuilder builder = new StringBuilder("run script " + script.getName());
-					// выполняем все команды из скрипта
-					for(Command c : script)
+			listAction.add(new Pair<Pattern, Consumer<String>>(// run command textPresentationCommand
+				Pattern.compile("^run command (?<textCommand>.+)$"),
+				(s) -> {
+					try {
+						String textPC = s.replace("run command", "").trim(); // текстовое представление команды
+						runCommand(new Command(textPC)); //выполнение команды
+						send("command [" + textPC + "] run succefull with answer [" + answer + "]");
+					} catch (WrongFormatCommandException wfce) {
+						send("wrong format command [" + s + "]");
+					} catch (NullPointerException npe) {
+						send("command not found [" + s + "]");
+					}
+				}));
+			listAction.add(new Pair<Pattern, Consumer<String>>(// run script scriptName
+					Pattern.compile("^run script (?<scriptName>[a-zA-Z0-9]+)$"),
+					(s) -> {
+						String scriptName = s.replace("run script", "").trim();
 						try {
-							runCommand(c);
-							builder.append(", command " + c + " run succefull with answer = " + answer);
-						} catch (NullPointerException npe) {
-							builder.append(", command " + c + " not run");
+							// есть ли такой скрипт в коллекции скриптов
+							Script script = ScriptCollection.instance().getScript(scriptName);
+							StringBuilder builder = new StringBuilder("run script " + script.getName());
+							// выполняем все команды из скрипта
+							for(Command c : script)
+								try {
+									runCommand(c);
+									builder.append(", command " + c + " run succefull with answer = " + answer);
+								} catch (NullPointerException npe) {
+									builder.append(", command " + c + " not run");
+								}
+							send(builder.toString());
+						} catch (ScriptNotFoundException snfe) {
+							send("script with name " + scriptName + " not found");
 						}
-					send(builder.toString());
-				} catch (ScriptNotFoundException snfe) {
-					send("script with name " + scriptName + " not found");
-				}
-			});
-			hash.put("save script", (s) -> {
-				//save script script_name list_commands
-				String textPresentationScript = s.replace("save script", "").trim();
-				// первая часть - это имя, остальное список тестовых представлений команд
-				StringTokenizer tokenizer = new StringTokenizer(textPresentationScript);
-				Script script = new Script(tokenizer.nextToken());
-				
-				StringBuilder builder = new StringBuilder("create script with name " + script.getName());
-				Boolean result = false;//были ли ошибка в тесте команд
-				while (tokenizer.hasMoreTokens()) {
-					String textPC = tokenizer.nextToken(); // текстовое представление команды
-					try {
-						Command c = new Command(textPC);
-						script.addCommand(c);
-						builder.append(", add command " + textPC + " succefull");
-					} catch (WrongFormatCommandException wfce) {// если в формате команды ошибка
-						builder.append(", wrong format command " + textPC + " not add to script");
-						result = true;
-					}
-				}
-				if (result) {// если была хотя бы одна ошибка
-					builder.append(", script not add to ScriptCollection");
-				} else {
-					try {
-						ScriptCollection.instance().add(script); // пытаемся добавить скрипт в коллекцию скриптов
-						builder.append(", script add to ScriptCollection");
-					} catch (ScriptIsEmptyException siex) {// не получилось добавить
-						builder.append(", script not add to ScriptCollection");
-					}
-				}
-				send(builder.toString());// отправляем отчет о проделанной работе
-			});
-			
+					}));
+			listAction.add(new Pair<Pattern, Consumer<String>>(//save script scriptName listCommands
+					Pattern.compile("^save script (?<scriptName>[a-zA-Z0-9]+)( [^ ])+$"),
+					(s) -> {
+						String textPresentationScript = s.replace("save script", "").trim();
+						// первая часть - это имя, остальное список тестовых представлений команд
+						StringTokenizer tokenizer = new StringTokenizer(textPresentationScript);
+						Script script = new Script(tokenizer.nextToken());
+
+						StringBuilder builder = new StringBuilder("create script with name " + script.getName());
+						Boolean result = false;//были ли ошибка в тесте команд
+						while (tokenizer.hasMoreTokens()) {
+							String textPC = tokenizer.nextToken(); // текстовое представление команды
+							try {
+								Command c = new Command(textPC);
+								script.addCommand(c);
+								builder.append(", add command " + textPC + " succefull");
+							} catch (WrongFormatCommandException wfce) {// если в формате команды ошибка
+								builder.append(", wrong format command " + textPC + " not add to script");
+								result = true;
+							}
+						}
+						if (result) {// если была хотя бы одна ошибка
+							builder.append(", script not add to ScriptCollection");
+						} else {
+							try {
+								ScriptCollection.instance().add(script); // пытаемся добавить скрипт в коллекцию скриптов
+								builder.append(", script add to ScriptCollection");
+							} catch (ScriptIsEmptyException siex) {// не получилось добавить
+								builder.append(", script not add to ScriptCollection");
+							}
+						}
+						send(builder.toString());// отправляем отчет о проделанной работе
+					}));
 		}
 		
 		public void analize(String text) throws InterruptedException {
-			for(String str : hash.keySet())
-				if (text.contains(str))
-					hash.get(str).action(text);
+			boolean mark = false;
+			for(int i = 0; i < listAction.size() && !mark; ++i)
+				if (listAction.get(i).getKey().matcher(text).matches()) {
+					listAction.get(i).getValue().accept(text);
+					mark = true;
+				}
 		}
 		
 		private void runCommand(Command c)
-				throws NullPointerException, InterruptedException {
+				throws NullPointerException {
 			IskanderusController.instance().switchCommand(c, SocketListener.this);
 			synchronized (obj) {
-				obj.wait();
+				try {
+					obj.wait();
+				} catch (InterruptedException e) {e.printStackTrace();}
 			}
 		}
 	}
