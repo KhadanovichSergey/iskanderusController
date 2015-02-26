@@ -193,6 +193,8 @@ public class SocketListener implements Runnable, AnswerSeterable {
 				if (pair.getKey().matcher(c.toString()).matches()) {
 					pair.getValue().accept(c.toString());
 					mark = true; // команда специализированная
+					// установить в слот значение, говорящее что команды специализированная
+					answer = "true";
 					break;
 				}
 			if (!mark) {// если команда обычная
