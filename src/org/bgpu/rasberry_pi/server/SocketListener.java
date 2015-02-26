@@ -159,7 +159,7 @@ public class SocketListener implements Runnable, AnswerSeterable {
 					builder.append(", script not add to ScriptCollection");
 				} else {
 					try {
-						ScriptCollection.instance().add(script); // пытаемся добавить команду в коллекцию команд
+						ScriptCollection.instance().add(script); // пытаемся добавить скрипт в коллекцию скриптов
 						builder.append(", script add to ScriptCollection");
 					} catch (ScriptIsEmptyException siex) {// не получилось добавить
 						builder.append(", script not add to ScriptCollection");
