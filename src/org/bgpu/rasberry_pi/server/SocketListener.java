@@ -107,35 +107,35 @@ public class SocketListener implements Runnable, AnswerSeterable {
 			listAction.add(new Pair<Pattern, Consumer<String>>(// run command textPresentationCommand
 				Pattern.compile("^run command (?<textCommand>.+)$"),
 				(s) -> {
+					String textPC = s.replace("run command", "").trim(); // текстовое представление команды
 					try {
-						String textPC = s.replace("run command", "").trim(); // текстовое представление команды
 						runCommand(new Command(textPC)); //выполнение команды
 						send("command [" + textPC + "] run succefull with answer [" + answer + "]");
 					} catch (WrongFormatCommandException wfce) {
-						send("wrong format command [" + s + "]");
+						send("wrong format command [" + textPC + "]");
 					} catch (NullPointerException npe) {
-						send("command not found [" + s + "]");
+						send("command not found [" + textPC + "]");
 					}
 				}));
 			listAction.add(new Pair<Pattern, Consumer<String>>(// run script scriptName
-					Pattern.compile("^run script (?<scriptName>[a-zA-Z0-9]+)$"),
+					Pattern.compile("^run script [a-zA-Z0-9]+$"),
 					(s) -> {
 						String scriptName = s.replace("run script", "").trim();
 						try {
 							// есть ли такой скрипт в коллекции скриптов
 							Script script = ScriptCollection.instance().getScript(scriptName);
-							StringBuilder builder = new StringBuilder("run script " + script.getName());
+							StringBuilder builder = new StringBuilder("run script with name [" + script.getName() + "]");
 							// выполняем все команды из скрипта
 							for(Command c : script)
 								try {
 									runCommand(c);
-									builder.append(", command " + c + " run succefull with answer = " + answer);
+									builder.append(" , command [" + c + "] run succefull with answer [" + answer + "]");
 								} catch (NullPointerException npe) {
-									builder.append(", command " + c + " not run");
+									builder.append(", command not found [" + c + "]");
 								}
 							send(builder.toString());
 						} catch (ScriptNotFoundException snfe) {
-							send("script with name " + scriptName + " not found");
+							send("script with name [" + scriptName + "] not found");
 						}
 					}));
 			listAction.add(new Pair<Pattern, Consumer<String>>(//save script scriptName listCommands
@@ -146,16 +146,16 @@ public class SocketListener implements Runnable, AnswerSeterable {
 						StringTokenizer tokenizer = new StringTokenizer(textPresentationScript);
 						Script script = new Script(tokenizer.nextToken());
 
-						StringBuilder builder = new StringBuilder("create script with name " + script.getName());
+						StringBuilder builder = new StringBuilder("create script with name [" + script.getName() + "] ");
 						Boolean result = false;//были ли ошибка в тесте команд
 						while (tokenizer.hasMoreTokens()) {
 							String textPC = tokenizer.nextToken(); // текстовое представление команды
 							try {
 								Command c = new Command(textPC);
 								script.addCommand(c);
-								builder.append(", add command " + textPC + " succefull");
+								builder.append(", add command [" + textPC + "] succefull");
 							} catch (WrongFormatCommandException wfce) {// если в формате команды ошибка
-								builder.append(", wrong format command " + textPC + " not add to script");
+								builder.append(", wrong format command [" + textPC + "] not add to script");
 								result = true;
 							}
 						}
