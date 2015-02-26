@@ -187,11 +187,21 @@ public class SocketListener implements Runnable, AnswerSeterable {
 		
 		private void runCommand(Command c)
 				throws NullPointerException {
-			IskanderusController.instance().switchCommand(c, SocketListener.this);
-			synchronized (obj) {
-				try {
-					obj.wait();
-				} catch (InterruptedException e) {e.printStackTrace();}
+			// если команда, является специальной командой из списка команд
+			boolean mark = false;
+			for(Pair<Pattern, Consumer<String>> pair : Command.specifiedCommands)
+				if (pair.getKey().matcher(c.toString()).matches()) {
+					pair.getValue().accept(c.toString());
+					mark = true; // команда специализированная
+					break;
+				}
+			if (!mark) {// если команда обычная
+				IskanderusController.instance().switchCommand(c, SocketListener.this);
+				synchronized (obj) {
+					try {
+						obj.wait();
+					} catch (InterruptedException e) {e.printStackTrace();}
+				}
 			}
 		}
 	}

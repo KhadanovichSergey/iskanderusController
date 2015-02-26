@@ -1,5 +1,7 @@
 package org.bgpu.rasberry_pi.structs;
 
+import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +18,20 @@ public class Command {
 	 * регулярное выражение команды
 	 */
 	private static final Pattern pattern = Pattern.compile("^(?<nameCommand>[a-zA-Z0-9]+)(" + ConfigLoader.instance().getValue("separatorArguments") + "[0-9]+)*$");
+	
+	/**
+	 * список специфичных команд и действий, которые нужно выполнять на эти команды
+	 * это комнады, которые выполняются на самой raspberry pi и не отсылаются на ардуины
+	 */
+	public static ArrayList<Pair<Pattern, Consumer<String>>> specifiedCommands = new ArrayList<>();
+	{
+		specifiedCommands.add(new Pair<Pattern, Consumer<String>>(Pattern.compile("^pause:[0-9]+$"), (s) -> {
+			int delay = Integer.parseInt(s.replace("pause:", "").trim());
+				try {
+					Thread.sleep(delay);
+				} catch (Exception e) {e.printStackTrace();}
+		}));
+	}
 	
 	/**
 	 * текстовое представление команды name:par1:par2:...:parN
@@ -46,6 +62,11 @@ public class Command {
 		return textPresentation;
 	}
 	
+	/**
+	 * проверяет соответсвие регулярному выражения текстового представления команды
+	 * @param textPresentation
+	 * @return
+	 */
 	private boolean check(String textPresentation) {
 		Matcher m = pattern.matcher(textPresentation);
 		return m.matches();
