@@ -172,6 +172,17 @@ public class SocketListener implements Runnable, AnswerSeterable {
 						}
 						send(builder.toString());// отправляем отчет о проделанной работе
 					}));
+			listAction.add(new Pair<Pattern, Consumer<String>>(// delete script script_name
+					Pattern.compile("^delete script (?<scriptName>[a-zA-Z0-9]+)$"),
+					(s) -> {
+						String scriptName = s.replace("delete script", "").trim();
+						try {
+							ScriptCollection.instance().deleteScript(scriptName);
+							send("script with name [" + scriptName + "] deleted");
+						} catch (ScriptNotFoundException snfe) {
+							send("script not found");
+						}
+					}));
 		}
 		
 		public void analize(String text) throws InterruptedException {
