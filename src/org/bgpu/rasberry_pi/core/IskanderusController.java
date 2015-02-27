@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bgpu.rasberry_pi.structs.AnswerSeterable;
+import org.bgpu.rasberry_pi.structs.AnswerSetable;
 import org.bgpu.rasberry_pi.structs.Command;
 import org.bgpu.rasberry_pi.structs.Pair;
 
@@ -64,11 +64,11 @@ public class IskanderusController {
 	 * @param textCommand полный текст команды
 	 * @throws NullPointerException если команда не распознана
 	 */
-	public void switchCommand(Command command, AnswerSeterable as) throws NullPointerException {
+	public void switchCommand(Command command, AnswerSetable as) throws NullPointerException {
 		QueueTaskManager qtm = table.get(command.getName());
 		
 		//установка команды в очередь к соответствующей ардуине
-		qtm.addPair(new Pair<Command, AnswerSeterable>(command, as));
+		qtm.addPair(new Pair<Command, AnswerSetable>(command, as));
 	}
 	
 	/**

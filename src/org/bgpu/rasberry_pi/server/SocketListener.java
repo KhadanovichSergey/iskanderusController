@@ -16,7 +16,7 @@ import org.bgpu.rasberry_pi.core.IskanderusController;
 import org.bgpu.rasberry_pi.exception.ScriptIsEmptyException;
 import org.bgpu.rasberry_pi.exception.ScriptNotFoundException;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
-import org.bgpu.rasberry_pi.structs.AnswerSeterable;
+import org.bgpu.rasberry_pi.structs.AnswerSetable;
 import org.bgpu.rasberry_pi.structs.Command;
 import org.bgpu.rasberry_pi.structs.Pair;
 import org.bgpu.rasberry_pi.structs.Script;
@@ -28,7 +28,7 @@ import org.bgpu.rasberry_pi.structs.ScriptCollection;
  * @author bazinga
  *
  */
-public class SocketListener implements Runnable, AnswerSeterable {
+public class SocketListener implements Runnable, AnswerSetable {
 
 	/**
 	 * сокет с которого читаются данные и в который отправляются результаты
