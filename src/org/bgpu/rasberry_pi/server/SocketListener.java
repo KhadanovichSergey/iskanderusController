@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import org.bgpu.rasberry_pi.core.IskanderusController;
@@ -189,12 +190,11 @@ public class SocketListener implements Runnable, AnswerSeterable {
 				throws NullPointerException {
 			// если команда, является специальной командой из списка команд
 			boolean mark = false;
-			for(Pair<Pattern, Consumer<String>> pair : Command.specifiedCommands)
+			for(Pair<Pattern, Function<String, String>> pair : Command.specifiedCommands)
 				if (pair.getKey().matcher(c.toString()).matches()) {
-					pair.getValue().accept(c.toString());
-					mark = true; // команда специализированная
 					// установить в слот значение, говорящее что команды специализированная
-					answer = "true";
+					answer = pair.getValue().apply(c.toString());
+					mark = true; // команда специализированная
 					break;
 				}
 			if (!mark) {// если команда обычная

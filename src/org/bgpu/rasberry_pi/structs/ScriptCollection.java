@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-
+import org.bgpu.rasberry_pi.exception.CollectionIsEmptyException;
 import org.bgpu.rasberry_pi.exception.ScriptIsEmptyException;
 import org.bgpu.rasberry_pi.exception.ScriptNotFoundException;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
@@ -50,11 +50,17 @@ public class ScriptCollection {
 	 * @param newScript новый скрипт
 	 * @throws IllegalArgumentException если скрипт, не создержит не одной команды, то exception
 	 */
-	public synchronized void add(Script newScript) throws ScriptIsEmptyException {
+	public void add(Script newScript) throws ScriptIsEmptyException {
 		if (newScript.size() <= 0)
 			throw new ScriptIsEmptyException();
-		scripts.add(newScript);
-		unloadCollection(ScriptCollection.DIR_NAME);
+		try {
+			deleteScript(newScript.getName());
+		} catch (ScriptNotFoundException snfe) {}
+		
+		synchronized (scripts) {
+			scripts.add(newScript);
+			unloadCollection(ScriptCollection.DIR_NAME);
+		}
 	}
 
 	/**
@@ -124,10 +130,44 @@ public class ScriptCollection {
 	 * @return объект script
 	 * @throws ScriptNotFoundException если скрипта в коллекции нет
 	 */
-	public synchronized Script getScript(String nameScript) throws ScriptNotFoundException {
-		for(Script s : scripts)
-			if (s.getName().equals(nameScript))
-				return s;
-		throw new ScriptNotFoundException(nameScript);
+	public Script getScript(String nameScript) throws ScriptNotFoundException {
+		synchronized (scripts) {
+			for(Script s : scripts)
+				if (s.getName().equals(nameScript))
+					return s;
+			throw new ScriptNotFoundException(nameScript);
+		}
+	}
+	
+	/**
+	 * получить список имен скриптов в виде строки через пробел)
+	 * @return список имен скриптов в виде строки через пробел
+	 * @throws CollectionIsEmptyException если в коллекции нет ни одного скрипта
+	 */
+	public String getListNameScripts() throws CollectionIsEmptyException {
+		StringBuilder builder = new StringBuilder("");
+		synchronized (scripts) {
+			for(Script s : scripts)
+				builder.append(" " + s.getName());
+			String result = builder.toString().trim();
+			if (result.equals(""))
+				throw new CollectionIsEmptyException();
+			return result;
+		}
+	}
+	
+	/**
+	 * удаляет скрипт из коллекции
+	 * скрипт удаляется как из внутреннего множества скриптов, так и из директории с файлами
+	 * @param scriptName имя скрипта, который нужно удалить
+	 * @throws ScriptNotFoundException если скрипта с таким именем нет
+	 */
+	public void deleteScript(String scriptName) throws ScriptNotFoundException {
+		Script s = getScript(scriptName);
+		File file = new File(ScriptCollection.DIR_NAME + "/" + s.getName() + ".script");
+		if (file.exists()) file.delete();
+		synchronized (scripts) {
+			scripts.remove(s);
+		}
 	}
 }

@@ -1,10 +1,11 @@
 package org.bgpu.rasberry_pi.structs;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bgpu.rasberry_pi.exception.CollectionIsEmptyException;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
 
 /**
@@ -23,13 +24,23 @@ public class Command {
 	 * список специфичных команд и действий, которые нужно выполнять на эти команды
 	 * это комнады, которые выполняются на самой raspberry pi и не отсылаются на ардуины
 	 */
-	public static ArrayList<Pair<Pattern, Consumer<String>>> specifiedCommands = new ArrayList<>();
+	public static ArrayList<Pair<Pattern, Function<String, String>>> specifiedCommands = new ArrayList<>();
 	{
-		specifiedCommands.add(new Pair<Pattern, Consumer<String>>(Pattern.compile("^pause:[0-9]+$"), (s) -> {
+		specifiedCommands.add(new Pair<Pattern, Function<String, String>>(Pattern.compile("^pause:[0-9]+$"), (s) -> {
 			int delay = Integer.parseInt(s.replace("pause:", "").trim());
 				try {
 					Thread.sleep(delay);
 				} catch (Exception e) {e.printStackTrace();}
+			return "pause run succsesful";
+		}));
+		specifiedCommands.add(new Pair<Pattern, Function<String, String>>(Pattern.compile("^listScript$"), (s) -> {
+			String result = "";
+			try {
+				result = ScriptCollection.instance().getListNameScripts();
+			} catch (CollectionIsEmptyException ciee) {
+				result = "collection is empty";
+			}
+			return result;
 		}));
 	}
 	
