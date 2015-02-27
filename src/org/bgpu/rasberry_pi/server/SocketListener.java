@@ -139,7 +139,7 @@ public class SocketListener implements Runnable, AnswerSeterable {
 						}
 					}));
 			listAction.add(new Pair<Pattern, Consumer<String>>(//save script scriptName listCommands
-					Pattern.compile("^save script (?<scriptName>[a-zA-Z0-9]+)( [^ ])+$"),
+					Pattern.compile("^save script (?<scriptName>[a-zA-Z0-9]+)( [^ ]+)+$"),
 					(s) -> {
 						String textPresentationScript = s.replace("save script", "").trim();
 						// первая часть - это имя, остальное список тестовых представлений команд
@@ -181,7 +181,7 @@ public class SocketListener implements Runnable, AnswerSeterable {
 					mark = true;
 				}
 			if (!mark) {
-				send(" [ " + text + " ] is not a command of protocol");
+				send("[" + text + "] is not a command of protocol");
 			}
 		}
 		
