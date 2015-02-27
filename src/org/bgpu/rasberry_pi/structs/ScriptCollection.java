@@ -40,6 +40,12 @@ public class ScriptCollection {
 		return SCRIPT_COLLECTION;
 	}
 	
+	/**
+	 * защищенный конструктор
+	 * объект ScriptCollection нельзя создавать, он в единственном экзампляре
+	 * проверяется, существует ли директория со скриптами, если ее нет, то она создается
+	 * загружается коллекция скриптов
+	 */
 	private ScriptCollection() {
 		checkDirectory(ScriptCollection.DIR_NAME);
 		loadCollection(ScriptCollection.DIR_NAME);
