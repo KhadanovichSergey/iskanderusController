@@ -90,7 +90,7 @@ public class ScriptCollection {
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line = reader.readLine();
 			StringTokenizer tokenizer = new StringTokenizer(line);
-			Script script = new Script(tokenizer.nextToken());
+			Script script = new Script(file.getName().replace(".script", "").trim());
 			while (tokenizer.hasMoreTokens())
 				script.addCommand(new Command(tokenizer.nextToken()));
 			scripts.add(script);

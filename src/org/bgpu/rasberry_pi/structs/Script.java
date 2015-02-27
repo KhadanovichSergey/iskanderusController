@@ -46,10 +46,10 @@ public class Script implements Iterable<Command>{
 	 */
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder(name);
+		StringBuilder builder = new StringBuilder();
 		for(Command c : commands)
 			builder.append(" " + c);
-		return builder.toString();
+		return builder.toString().trim();
 	}
 	
 	/**
