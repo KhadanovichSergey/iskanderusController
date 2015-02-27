@@ -125,16 +125,16 @@ public class SocketListener implements Runnable, AnswerSeterable {
 						try {
 							// есть ли такой скрипт в коллекции скриптов
 							Script script = ScriptCollection.instance().getScript(scriptName);
-							StringBuilder builder = new StringBuilder("run script with name [" + script.getName() + "]");
+							send("start script with name [" + script.getName() + "]");
 							// выполняем все команды из скрипта
 							for(Command c : script)
 								try {
 									runCommand(c);
-									builder.append(" , command [" + c + "] run succefull with answer [" + answer + "]");
+									send("command [" + c + "] run succefull with answer [" + answer + "]");
 								} catch (NullPointerException npe) {
-									builder.append(", command not found [" + c + "]");
+									send("command not found [" + c + "]");
 								}
-							send(builder.toString());
+							send("stop script with name [" + script.getName() + "]");
 						} catch (ScriptNotFoundException snfe) {
 							send("script with name [" + scriptName + "] not found");
 						}
@@ -147,30 +147,29 @@ public class SocketListener implements Runnable, AnswerSeterable {
 						StringTokenizer tokenizer = new StringTokenizer(textPresentationScript);
 						Script script = new Script(tokenizer.nextToken());
 
-						StringBuilder builder = new StringBuilder("create script with name [" + script.getName() + "] ");
+						send("create script with name [" + script.getName() + "]");
 						Boolean result = false;//были ли ошибка в тесте команд
 						while (tokenizer.hasMoreTokens()) {
 							String textPC = tokenizer.nextToken(); // текстовое представление команды
 							try {
 								Command c = new Command(textPC);
 								script.addCommand(c);
-								builder.append(", add command [" + textPC + "] succefull");
+								send("add command [" + textPC + "] succefull");
 							} catch (WrongFormatCommandException wfce) {// если в формате команды ошибка
-								builder.append(", wrong format command [" + textPC + "] not add to script");
+								send("wrong format command [" + textPC + "] not add to script");
 								result = true;
 							}
 						}
 						if (result) {// если была хотя бы одна ошибка
-							builder.append(", script not add to ScriptCollection");
+							send("script not add to ScriptCollection");
 						} else {
 							try {
 								ScriptCollection.instance().add(script); // пытаемся добавить скрипт в коллекцию скриптов
-								builder.append(", script add to ScriptCollection");
+								send("script add to ScriptCollection");
 							} catch (ScriptIsEmptyException siex) {// не получилось добавить
-								builder.append(", script not add to ScriptCollection");
+								send("script not add to ScriptCollection");
 							}
 						}
-						send(builder.toString());// отправляем отчет о проделанной работе
 					}));
 			listAction.add(new Pair<Pattern, Consumer<String>>(// delete script script_name
 					Pattern.compile("^delete script (?<scriptName>[a-zA-Z0-9]+)$"),
