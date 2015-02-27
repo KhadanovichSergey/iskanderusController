@@ -1,5 +1,12 @@
 package org.bgpu.rasberry_pi.structs;
 
+/**
+ * пара для общих нужд
+ * @author bazinga
+ *
+ * @param <K>
+ * @param <V>
+ */
 public class Pair<K, V> {
 
 	private K key;
