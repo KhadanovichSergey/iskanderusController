@@ -5,7 +5,6 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bgpu.rasberry_pi.exception.CollectionIsEmptyException;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
 
 /**
@@ -13,6 +12,7 @@ import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
  * @author bazinga
  *
  */
+@SuppressWarnings("unchecked")
 public class Command {
 	
 	/**
@@ -21,27 +21,25 @@ public class Command {
 	private static final Pattern pattern = Pattern.compile("^(?<nameCommand>[a-zA-Z0-9]+)(" + ConfigLoader.instance().getValue("separatorArguments") + "[0-9]+)*$");
 	
 	/**
-	 * список специфичных команд и действий, которые нужно выполнять на эти команды
-	 * это комнады, которые выполняются на самой raspberry pi и не отсылаются на ардуины
+	 * список пар шаблонов специфичных команд и действий, в ответ на эти команды
 	 */
 	public static ArrayList<Pair<Pattern, Function<String, String>>> specifiedCommands = new ArrayList<>();
-	{
-		specifiedCommands.add(new Pair<Pattern, Function<String, String>>(Pattern.compile("^pause:[0-9]+$"), (s) -> {
-			int delay = Integer.parseInt(s.replace("pause:", "").trim());
-				try {
-					Thread.sleep(delay);
-				} catch (Exception e) {e.printStackTrace();}
-			return "pause run succsesful";
-		}));
-		specifiedCommands.add(new Pair<Pattern, Function<String, String>>(Pattern.compile("^listScript$"), (s) -> {
-			String result = "";
+	
+	/**
+	 * инициализация списка пар, путем чтения конфигурационного файла
+	 * со значенями шаблонов и полных имен классов, инстансы которых будут обрабатывать событие,
+	 * подходящее под данный шаблон
+	 */
+	static {
+		String[] names = ConfigLoader.instance().getSpecifiedKeyArray();
+		for(String name : names) {
 			try {
-				result = ScriptCollection.instance().getListNameScripts();
-			} catch (CollectionIsEmptyException ciee) {
-				result = "collection is empty";
-			}
-			return result;
-		}));
+				Pair<Pattern, Function<String, String>> pair = new Pair<>();
+				pair.setKey(Pattern.compile(ConfigLoader.instance().getValue(name + ".pattern")));
+				pair.setValue((Function<String, String>)Class.forName(ConfigLoader.instance().getValue(name + ".class")).newInstance());
+				specifiedCommands.add(pair);
+			} catch (Exception e) {e.printStackTrace();}
+		}
 	}
 	
 	/**
