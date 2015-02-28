@@ -52,14 +52,14 @@ public class ConfigLoader {
 	}
 	
 	/**
-	 * возвращает массив ключей имен специфичных комманд,
-	 * загруженных из файла
-	 * @return массив имен специфичных комманды
+	 * возвращает массив специфичных ключей
+	 * @param contatins строка, которая должна идентифицировать специфичность
+	 * @return массив ключей
 	 */
-	public String[] getSpecifiedKeyArray() {
+	public String[] getKeyArray(String contatins) {
 		return properties.keySet().stream()
 				.map((o) -> (String)o)
-				.filter((s) -> s.contains("specifiedCommand"))
+				.filter((s) -> s.contains(contatins))
 				.map((s) -> s.replace(".class", "").replace(".pattern", "").trim())
 				.distinct()
 				.sorted()

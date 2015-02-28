@@ -31,7 +31,7 @@ public class Command {
 	 * подходящее под данный шаблон
 	 */
 	static {
-		String[] names = ConfigLoader.instance().getSpecifiedKeyArray();
+		String[] names = ConfigLoader.instance().getKeyArray("specified");
 		for(String name : names) {
 			try {
 				Pair<Pattern, Function<String, String>> pair = new Pair<>();
