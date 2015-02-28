@@ -64,14 +64,15 @@ public class SocketListener implements Runnable {
 	}
 	
 		
-		/**
-		 * таблица ассоциаций между текстом, который входит в набор пришедший по сети
-		 * и действиями которые нужно сделать с этим текстом
-		 */
-		
-		
+	/**
+	 * таблица ассоциаций между шаблонами запросов на сервер и именами классов,
+	 * которые эти запросы обрабатывают
+	 */
 	private static ArrayList<Pair<Pattern, String>> listAction = new ArrayList<>();
 	
+	/**
+	 * чтение конфига и инифиализация списка ассоциаций
+	 */
 	static {
 		String[] names = ConfigLoader.instance().getKeyArray("tcpHandler");
 		for(String name : names) {
@@ -83,7 +84,14 @@ public class SocketListener implements Runnable {
 			} catch (Exception e) {e.printStackTrace();}
 		}
 	}
-		
+	
+	/**
+	 * этот метод, анализирует сообщение, которые было получено по сети, на соответсвие
+	 * шаблону из списка ассоциаций. Если сообщение удовлетворяет шаблону, то создается объект класса,
+	 * ответственный за обработку данной команду и у него вызывается метод обработки этой команды
+	 * @param text текст запроса, полученный по сети
+	 * @throws InterruptedException
+	 */
 	public void analize(String text) throws InterruptedException {
 		boolean mark = false;
 		for(int i = 0; i < listAction.size() && !mark; ++i)

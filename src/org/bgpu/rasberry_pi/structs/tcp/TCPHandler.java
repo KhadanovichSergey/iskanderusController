@@ -37,6 +37,14 @@ public abstract class TCPHandler implements Function<String, String>, AnswerSeta
 		}
 	}
 
+	/**
+	 * выполняет команду с
+	 * если команда специализированная, то выполнять ее непосредственно, вызывая ее обработчик, 
+	 * иначи поставить команду в очередь к соответствующей ардуине
+	 * @param c команда, которую необходимо выполнить
+	 * @throws NullPointerException если не специализированной команде не нашлось ардуины, 
+	 * 	которая может ее выполнить...
+	 */
 	protected void runCommand(Command c) throws NullPointerException {
 		// если команда, является специальной командой из списка команд
 		boolean mark = false;
@@ -57,11 +65,21 @@ public abstract class TCPHandler implements Function<String, String>, AnswerSeta
 		}
 	}
 	
+	/**
+	 * этот метод обрабатывает сообщение t
+	 * именно его нуобходимо вызывать из вне класса, а не метод apply
+	 * @param t
+	 * @return
+	 */
 	public String myApply(String t) {
 		builder = new StringBuilder();
 		return apply(t);
 	}
 	
+	/**
+	 * добавляет сообщение в буфер сообщений
+	 * @param text сообщение, которые нужно добавить
+	 */
 	protected void append(String text) {
 		builder.append(text + "\n");
 	}
