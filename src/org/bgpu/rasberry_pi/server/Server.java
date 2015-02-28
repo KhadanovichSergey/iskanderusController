@@ -13,9 +13,13 @@ public class Server {
 	private static final Logger LOGGER = LogManager.getLogger(Server.class);
 
 	public static void main(String... args) throws ClassNotFoundException {
+		if (args.length == 0) {
+			LOGGER.fatal("jar run without arguments");
+			System.exit(1);
+		}
+		
 		//устанавливаем конфиг
-//		ConfigLoader.setDestination((args.length == 0) ? "/etc/raspberry/config.properties": args[0]);
-		ConfigLoader.setDestination("/etc/raspberry/config.properties");
+		ConfigLoader.setDestination(args[0]);
 		
 		Class.forName("org.bgpu.rasberry_pi.core.IskanderusController");
 		Class.forName("org.bgpu.rasberry_pi.structs.ScriptCollection");
@@ -32,5 +36,6 @@ public class Server {
 				new Thread(new SocketListener(socket)).start();
 			}
 		} catch (IOException e) {e.printStackTrace();}
+		
 	}
 }
