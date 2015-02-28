@@ -50,4 +50,19 @@ public class ConfigLoader {
 	public String getValue(String key) {
 		return properties.getProperty(key);
 	}
+	
+	/**
+	 * возвращает массив ключей имен специфичных комманд,
+	 * загруженных из файла
+	 * @return массив имен специфичных комманды
+	 */
+	public String[] getSpecifiedKeyArray() {
+		return properties.keySet().stream()
+				.map((o) -> (String)o)
+				.filter((s) -> s.contains("specifiedCommand"))
+				.map((s) -> s.replace(".class", "").replace(".pattern", "").trim())
+				.distinct()
+				.sorted()
+				.toArray(String[]::new);
+	}
 }
