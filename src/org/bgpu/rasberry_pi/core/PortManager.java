@@ -13,6 +13,7 @@ import jssc.SerialPortException;
  * осуществляет передачу сообщений между arduino и raspberry pi
  * сообщения представляют собой простую строку, которая внутри метода перед отправкой
  * оборачивается в separators и после чтения ответа эти же separators отбрасываются
+ * сепароторы команды, устанавливаются в конфигурационной файле
  * @author bazinga
  */
 public class PortManager {
@@ -30,6 +31,7 @@ public class PortManager {
 	
 	/**
 	 * задержка после открытая порта
+	 * значение считывается с конфигурационного файла
 	 */
 	private int sleep = Integer.parseInt(ConfigLoader.instance().getValue("sleepAfterOpenPort"));
 	
