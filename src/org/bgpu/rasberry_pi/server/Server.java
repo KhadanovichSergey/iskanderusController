@@ -8,12 +8,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bgpu.rasberry_pi.structs.ConfigLoader;
 
+/**
+ * главный класс этого проекта
+ * @author bazinga
+ *
+ */
 public class Server {
 	
 	private static final Logger LOGGER = LogManager.getLogger(Server.class);
 
 	public static void main(String... args) throws ClassNotFoundException {
-		if (args.length == 0) {
+		if (args.length == 0) {// если не переданно не одного параметра
 			LOGGER.fatal("jar run without arguments");
 			System.exit(1);
 		}

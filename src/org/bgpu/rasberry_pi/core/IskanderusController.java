@@ -23,7 +23,6 @@ import jssc.SerialPortList;
  */
 public class IskanderusController {
 	
-	@SuppressWarnings("unused")
 	private static final Logger LOGGER = LogManager.getFormatterLogger(IskanderusController.class);
 	
 	/**
@@ -65,10 +64,13 @@ public class IskanderusController {
 	 * @throws NullPointerException если команда не распознана
 	 */
 	public void switchCommand(Command command, AnswerSetable as) throws NullPointerException {
-		QueueTaskManager qtm = table.get(command.getName());
+		LOGGER.entry(command, as);
 		
+		QueueTaskManager qtm = table.get(command.getName());
 		//установка команды в очередь к соответствующей ардуине
 		qtm.addPair(new Pair<Command, AnswerSetable>(command, as));
+		
+		LOGGER.exit();
 	}
 	
 	/**
@@ -93,10 +95,12 @@ public class IskanderusController {
 		private Pair<Boolean, String> isArduino(String name) {
 			Pair<Boolean, String> p = new Pair<>();
 			p.setKey(false);
+			LOGGER.debug("запуск системного процесса udevadm для получения полной информации об устройстве с именем " + name);
 			ProcessBuilder pb = new ProcessBuilder("udevadm", "info", "--query=all", "--name=" + name);
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(pb.start().getInputStream()))) {
 				String str = null;
 				while ((str = reader.readLine()) != null) {
+					LOGGER.debug(str);
 					if (str.toLowerCase().contains("arduino"))
 						p.setKey(true);
 					Matcher m = pattern.matcher(str);
@@ -124,28 +128,35 @@ public class IskanderusController {
 			
 			//создаем список новых id устройств
 			ArrayList<String> newListIdDevice = new ArrayList<>();
+			LOGGER.debug("получили список всех usb устройств");
 			
 			for(String portName : portNames) {
+				LOGGER.debug(portName);
 				Pair<Boolean, String> p = isArduino(portName);
 				if (p.getKey()) {//если это ардуино
+					LOGGER.debug("это ардуина");
 					String name = p.getValue();//получаем ее id
 					newListIdDevice.add(name);
 					if (!listIdDevice.contains(name)) {// если этого устройства раньше не было
+						LOGGER.debug("этого устройства раньше не было в списке, создаем для него очередь задач");
 						QueueTaskManager qtm = new QueueTaskManager(portName, name);
 						//добавить его команды в хэш
 						List<String> commandNames = qtm.getCommandNames();
+						LOGGER.debug("получаем список его команд и добавляем их в хэш ассоциаций");
 						for(String cn : commandNames)
 							table.put(cn, qtm);//команды добавляются в хэш
 						qtm.start();
-						System.out.println("add device with name (" + qtm.getProgrammNameDevice() + " -- " + name + ")");
+						LOGGER.info("add device with name (" + qtm.getProgrammNameDevice() + " -- " + name + ")");
 					}
 				}
 			}
 			
 			for(String n : listIdDevice) {//просматриваем старый список устройств
 				if (!newListIdDevice.contains(n)) {
+					LOGGER.debug("устройство " + n + "не создержится в новом списке устройств");
 					Enumeration<String> e = table.keys();
 					String pnd = "";
+					LOGGER.debug("удаляем все его команды из списка ассоциаций");
 					while (e.hasMoreElements()) {
 						String command = e.nextElement();
 						QueueTaskManager qtm = table.get(command);
@@ -154,7 +165,8 @@ public class IskanderusController {
 							table.remove(command, qtm);//удаляем команды этого устройства из хэша
 						}
 					}
-					System.out.println("delete device with name (" + pnd + " -- " + n + ")");
+					LOGGER.info("delete device with name (" + pnd + " -- " + n + ")");
+					System.out.println();
 				}
 			}
 			
