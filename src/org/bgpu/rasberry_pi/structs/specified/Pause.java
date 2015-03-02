@@ -13,4 +13,8 @@ public class Pause implements Function<String, String> {
 		return "pause run succsesful";
 	}
 
+	@Override
+	public String toString() {
+		return "this is a pause command";
+	}
 }

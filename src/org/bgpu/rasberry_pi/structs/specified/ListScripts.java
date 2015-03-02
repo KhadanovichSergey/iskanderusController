@@ -18,4 +18,8 @@ public class ListScripts implements Function<String, String> {
 		return result;
 	}
 
+	@Override
+	public String toString() {
+		return "this is a listScript command";
+	}
 }

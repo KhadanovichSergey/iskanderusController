@@ -5,6 +5,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
 
 /**
@@ -14,6 +16,8 @@ import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
  */
 @SuppressWarnings("unchecked")
 public class Command {
+	
+	private static final Logger LOGGER = LogManager.getFormatterLogger(Command.class);
 	
 	/**
 	 * регулярное выражение команды
@@ -31,12 +35,16 @@ public class Command {
 	 * подходящее под данный шаблон
 	 */
 	static {
+		LOGGER.debug("инифиализация списка специфичных команд");
 		String[] names = ConfigLoader.instance().getKeyArray("specified");
+		LOGGER.debug("получение списка всех ключей из конфигурационного файла");
 		for(String name : names) {
+			LOGGER.debug("ключ с именем " + name);
 			try {
 				Pair<Pattern, Function<String, String>> pair = new Pair<>();
 				pair.setKey(Pattern.compile(ConfigLoader.instance().getValue(name + ".pattern")));
 				pair.setValue((Function<String, String>)Class.forName(ConfigLoader.instance().getValue(name + ".class")).newInstance());
+				LOGGER.debug("получение шаблона " + pair.getKey().toString() + ", и имени класса " + pair.getValue().toString());
 				specifiedCommands.add(pair);
 			} catch (Exception e) {e.printStackTrace();}
 		}
