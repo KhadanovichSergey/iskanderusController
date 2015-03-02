@@ -95,12 +95,10 @@ public class IskanderusController {
 		private Pair<Boolean, String> isArduino(String name) {
 			Pair<Boolean, String> p = new Pair<>();
 			p.setKey(false);
-			LOGGER.debug("запуск системного процесса udevadm для получения полной информации об устройстве с именем " + name);
 			ProcessBuilder pb = new ProcessBuilder("udevadm", "info", "--query=all", "--name=" + name);
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(pb.start().getInputStream()))) {
 				String str = null;
 				while ((str = reader.readLine()) != null) {
-					LOGGER.debug(str);
 					if (str.toLowerCase().contains("arduino"))
 						p.setKey(true);
 					Matcher m = pattern.matcher(str);
