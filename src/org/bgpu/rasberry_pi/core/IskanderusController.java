@@ -64,13 +64,10 @@ public class IskanderusController {
 	 * @throws NullPointerException если команда не распознана
 	 */
 	public void switchCommand(Command command, AnswerSetable as) throws NullPointerException {
-		LOGGER.entry(command, as);
-		
+		LOGGER.debug("switch command %s", command.toString());
 		QueueTaskManager qtm = table.get(command.getName());
 		//установка команды в очередь к соответствующей ардуине
 		qtm.addPair(new Pair<Command, AnswerSetable>(command, as));
-		
-		LOGGER.exit();
 	}
 	
 	/**
@@ -126,21 +123,19 @@ public class IskanderusController {
 			
 			//создаем список новых id устройств
 			ArrayList<String> newListIdDevice = new ArrayList<>();
-			LOGGER.debug("получили список всех usb устройств");
 			
 			for(String portName : portNames) {
-				LOGGER.debug(portName);
 				Pair<Boolean, String> p = isArduino(portName);
 				if (p.getKey()) {//если это ардуино
-					LOGGER.debug("это ардуина");
 					String name = p.getValue();//получаем ее id
 					newListIdDevice.add(name);
 					if (!listIdDevice.contains(name)) {// если этого устройства раньше не было
-						LOGGER.debug("этого устройства раньше не было в списке, создаем для него очередь задач");
+						LOGGER.debug("list's arduino dont't contatin the device with name %s"
+								+ ", create queuetaskManager for its", name);
 						QueueTaskManager qtm = new QueueTaskManager(portName, name);
 						//добавить его команды в хэш
 						List<String> commandNames = qtm.getCommandNames();
-						LOGGER.debug("получаем список его команд и добавляем их в хэш ассоциаций");
+						LOGGER.debug("get list command device with name %s, add its to hash associate");
 						for(String cn : commandNames)
 							table.put(cn, qtm);//команды добавляются в хэш
 						qtm.start();
@@ -151,10 +146,10 @@ public class IskanderusController {
 			
 			for(String n : listIdDevice) {//просматриваем старый список устройств
 				if (!newListIdDevice.contains(n)) {
-					LOGGER.debug("устройство " + n + "не создержится в новом списке устройств");
+					LOGGER.debug("device %s is not contained into new list devices", n);
 					Enumeration<String> e = table.keys();
 					String pnd = "";
-					LOGGER.debug("удаляем все его команды из списка ассоциаций");
+					LOGGER.debug("delete commands of device %s from hash associate", n);
 					while (e.hasMoreElements()) {
 						String command = e.nextElement();
 						QueueTaskManager qtm = table.get(command);

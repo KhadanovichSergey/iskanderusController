@@ -50,10 +50,9 @@ public class QueueTaskManager {
 	 * @param id id устройства
 	 */
 	public QueueTaskManager(PortManager newPortManager, String id) {
-		LOGGER.entry(newPortManager, id);
 		portManager = newPortManager;
 		init(id);
-		LOGGER.exit();
+		LOGGER.debug("create queueTaskManager for arduino on port %s" + newPortManager);
 	}
 	
 	/**
@@ -62,23 +61,16 @@ public class QueueTaskManager {
 	 * @param id id устройства
 	 */
 	public QueueTaskManager(String portName, String id) {
-		LOGGER.entry(portName, id);
-		
 		portManager = new PortManager(portName);
 		init(id);
-		
-		LOGGER.exit();
+		LOGGER.debug("create queueTaskManager for arduino on port %s", portName);
 	}
 	
 	private void init(String id) {
-		LOGGER.entry(id);
-		
 		portManager.openPort();
-		LOGGER.debug("get programm device's name");
 		programmNameDevice = portManager.work("name");
+		LOGGER.debug("get programm device's name %s", programmNameDevice);
 		idDevice = id;
-		
-		LOGGER.exit();
 	}
 	
 	/**
@@ -86,6 +78,7 @@ public class QueueTaskManager {
 	 */
 	public void start() {
 		new Thread(worker).start();
+		LOGGER.debug("started inner worker to device with name %s", programmNameDevice);
 	}
 	/**
 	 * добавляет задачу в очередь задач
@@ -93,14 +86,12 @@ public class QueueTaskManager {
 	 * @param socket сокет, в который нужно отправить ответ
 	 */
 	public void addPair(Pair<Command, AnswerSetable> pair) {
-		LOGGER.entry(pair);
 		synchronized (tasks) {
 			LOGGER.debug("add task with command's text to queue to device with name %s", programmNameDevice);
 			tasks.add(pair);
 		}
-		LOGGER.debug("resume woker command");
+		LOGGER.debug("resume woker command for device with name %s", programmNameDevice);
 		worker.resume();
-		LOGGER.exit();
 	}
 	
 	/**
@@ -108,14 +99,12 @@ public class QueueTaskManager {
 	 * @param task задача, которую нужно выполнить
 	 */
 	private void work(Pair<Command, AnswerSetable> pair) {
-		LOGGER.entry(pair);
-		
 		synchronized (portManager) {
 			String resultWorkCommand = portManager.work(pair.getKey().toString());
 			pair.getValue().setAnswer(resultWorkCommand);
+			LOGGER.debug("run command %s on arduino with name %s",
+					pair.getKey().toString(), programmNameDevice);
 		}
-		
-		LOGGER.exit();
 	}
 	
 	/**
@@ -124,7 +113,6 @@ public class QueueTaskManager {
 	 * @return список команд
 	 */
 	public List<String> getCommandNames() {
-		LOGGER.entry();	
 		ArrayList<String> result = new ArrayList<>();
 		synchronized (portManager) {
 			LOGGER.debug("generate command's list from %s", programmNameDevice);
@@ -132,7 +120,7 @@ public class QueueTaskManager {
 			while (st.hasMoreTokens())
 				result.add(st.nextToken());
 		}
-		return LOGGER.exit(result);
+		return result;
 	}
 	
 	/**
@@ -140,8 +128,7 @@ public class QueueTaskManager {
 	 * @return имя устройства
 	 */
 	public String getProgrammNameDevice() {
-		LOGGER.entry();
-		return LOGGER.exit(programmNameDevice);
+		return programmNameDevice;
 	}
 	
 	/**
@@ -149,8 +136,7 @@ public class QueueTaskManager {
 	 * @return
 	 */
 	public String getIdDevice() {
-		LOGGER.entry();
-		return LOGGER.exit(idDevice);
+		return idDevice;
 	}
 	
 	/**
@@ -175,7 +161,7 @@ public class QueueTaskManager {
 							isEmpty = true;
 							LOGGER.debug("queue to device %s is empty", programmNameDevice);
 						} else {
-							LOGGER.debug("queue to device %s is not empty and command run", programmNameDevice);
+							LOGGER.debug("queue to device %s is not empty", programmNameDevice);
 							work(tasks.remove());
 						}
 					}

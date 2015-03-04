@@ -53,6 +53,7 @@ public class PortManager {
 	 */
 	public PortManager(String portName) {
 		serialPort = new SerialPort(portName);
+		LOGGER.debug("create portManager with name " + portName);
 	}
 	
 	/**
@@ -61,7 +62,6 @@ public class PortManager {
 	 * после вызова этого метода, устройство перезагружается (arduino)
 	 */
 	public void openPort() {
-		LOGGER.entry();
 		try {
 			serialPort.openPort();
 			Thread.sleep(sleep);
@@ -72,9 +72,7 @@ public class PortManager {
 					Integer.parseInt(ConfigLoader.instance().getValue("parity")));
 			serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
             serialPort.addEventListener(serialReader);
-            
-		} catch(Exception e) {e.printStackTrace();}
-		LOGGER.exit();
+		} catch(Exception e) { LOGGER.catching(e);}
 	}
 	
 	/**
@@ -82,11 +80,9 @@ public class PortManager {
 	 * после того как вызван этот метод, пользоваться методом work() нельзя.
 	 */
 	public void closePort() {
-		LOGGER.entry();
 		try {
 			serialPort.closePort();
-		} catch(SerialPortException spe) {spe.printStackTrace();}
-		LOGGER.exit();
+		} catch(SerialPortException spe) { LOGGER.catching(spe); }
 	}
 
 	/**
@@ -97,19 +93,20 @@ public class PortManager {
 	 * @return результат выполнения команды
 	 */
 	public String work(String commandTo) {
-		LOGGER.entry(commandTo);
 		String result = "";
 		try {
 			serialPort.writeBytes((separators[0] + commandTo + separators[1]).getBytes());
-			LOGGER.debug("written data to port : %s", separators[0] + commandTo + separators[1]);
-			LOGGER.debug("wait while answer didn't come");
+			LOGGER.debug("write data %s to port with name %s",
+				separators[0] + commandTo + separators[1], serialPort.getPortName());
+			LOGGER.debug("wait while answer didn't come from port with name %s", serialPort.getPortName());
 			synchronized (obj) {
 	    		obj.wait();
 	    	}
 			result = serialReader.getAnswer();
-			LOGGER.debug("answer has just came : %s", result);
-		} catch(Exception e) {e.printStackTrace();}
-		return LOGGER.exit(result);
+			LOGGER.debug("answer has just came %s from port with name %s",
+					result, serialPort.getPortName());
+		} catch(Exception e) { LOGGER.catching(e); }
+		return result;
 	}
 	
 	/**
@@ -132,22 +129,23 @@ public class PortManager {
 			if (spe.isRXCHAR()) {//если пришли символы
 				try {
 					String c = new String(serialPort.readBytes(1));
-					LOGGER.debug("to port came symbol : %s", c);
+					LOGGER.debug("to port with name %s came symbol %s",
+							serialPort.getPortName(), c);
 					if (c.equals(separators[0])) {
-						LOGGER.debug("start answer from arduino");
+						LOGGER.debug("start answer from arduino on port %s", serialPort.getPortName());
 						start = true;//команда началась
 						answer = "";//очистить буфет
 					} else if (c.equals(separators[1]) && start) {
-						LOGGER.debug("stop answer from arduino");
+						LOGGER.debug("stop answer from arduino on port %s", serialPort.getPortName());
 						start = false;
 						synchronized (obj) {
 							obj.notify();
 						}
 					} else if (start) {
 						answer += c;
-						LOGGER.debug("we sent part of answer : %s", answer);
+						LOGGER.debug("we sent part of answer %s from port %s", answer, serialPort.getPortName());
 					}
-				} catch(SerialPortException ex) {ex.printStackTrace();}
+				} catch(SerialPortException ex) { LOGGER.catching(ex); }
 			}
 		}
 		
@@ -158,8 +156,7 @@ public class PortManager {
 		 * @return
 		 */
 		public String getAnswer() {
-			LOGGER.entry();
-			return LOGGER.exit(answer);
+			return answer;
 		}
 	}
 }
