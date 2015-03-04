@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bgpu.rasberry_pi.exception.CollectionIsEmptyException;
 import org.bgpu.rasberry_pi.exception.ScriptIsEmptyException;
 import org.bgpu.rasberry_pi.exception.ScriptNotFoundException;
@@ -17,6 +19,7 @@ import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
 
 public class ScriptCollection {
 	
+	private static final Logger LOGGER = LogManager.getLogger(ScriptCollection.class);
 	/**
 	 * имя файла, где хранится коллекция
 	 */
@@ -82,8 +85,8 @@ public class ScriptCollection {
 			try {
 				loadScript(f);
 			} catch (WrongFormatCommandException wfce) {
-				System.out.println("can't read file " + f.getName());
-				wfce.printStackTrace();
+				LOGGER.info("can't read file %s", f.getName());
+				LOGGER.catching(wfce);
 			}
 	}
 	
@@ -100,7 +103,7 @@ public class ScriptCollection {
 			while (tokenizer.hasMoreTokens())
 				script.addCommand(new Command(tokenizer.nextToken()));
 			scripts.add(script);
-		} catch (IOException ioe) {ioe.printStackTrace();}
+		} catch (IOException ioe) {LOGGER.catching(ioe);}
 	}
 	
 	/**
@@ -112,7 +115,7 @@ public class ScriptCollection {
 			try (BufferedWriter writer = new BufferedWriter(new FileWriter(ScriptCollection.DIR_NAME + "/" + s.getName() + ".script"))) {
 				writer.write(s.toString() + System.getProperty("line.separator"));
 				writer.flush();
-			} catch (IOException ioe) {ioe.printStackTrace();}
+			} catch (IOException ioe) {LOGGER.catching(ioe);}
 		}
 	}
 	
@@ -124,9 +127,9 @@ public class ScriptCollection {
 	private void checkDirectory(String dirName) {
 		File file = new File(dirName);
 		if (!file.exists()) {
-			System.out.println("directory " + ScriptCollection.DIR_NAME+ " doesn't exists");
+			LOGGER.info("directory %s doesn't exists", ScriptCollection.DIR_NAME);
 			file.mkdirs();
-			System.out.println("created directory " + ScriptCollection.DIR_NAME);
+			LOGGER.info("createdd directory %s " + ScriptCollection.DIR_NAME);
 		}
 	}
 	

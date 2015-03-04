@@ -102,7 +102,7 @@ public class IskanderusController {
 					if (m.matches())
 						p.setValue(m.group("idDevice"));
 				}
-			} catch(IOException e) {e.printStackTrace();}
+			} catch(IOException e) { LOGGER.catching(e);}
 			return p;
 		}
 		

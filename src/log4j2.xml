@@ -4,10 +4,25 @@
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
 		</Console>
+		<File name="MyFile" fileName="/var/log/raspberry.log">
+	      <PatternLayout>
+	        <Pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
+	      </PatternLayout>
+	    </File>
 	</Appenders>
-	
 	<Loggers>
+		<Logger name="org.bgpu.rasberry_pi.core.PortManager" level="OFF" additivity="true"></Logger>
+	    <Logger name="org.bgpu.rasberry_pi.core.QueueTaskManager" level="OFF" additivity="true"></Logger>
+	    <Logger name="org.bgpu.rasberry_pi.core.IskanderusController" level="INFO" additivity="true"></Logger>
+		
+		<Logger name="org.bgpu.rasberry_pi.server.Server" level="INFO" additivity="true"></Logger>
+		<Logger name="org.bgpu.rasberry_pi.server.ServerSocket" level="OFF" additivity="true"></Logger>
+		
+		<Logger name="org.bgpu.rasberry_pi.structs.Command" level="OFF" additivity="true"></Logger>
+		<Logger name="org.bgpu.rasberry_pi.structs.ScriptCollection" level="OFF" additivity="true"></Logger>
+		
 		<Root level="INFO">
+			<AppenderRef ref="MyFile"/>
 			<AppenderRef ref="Console"/>
 		</Root>
 	</Loggers>

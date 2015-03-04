@@ -35,16 +35,16 @@ public class Command {
 	 * подходящее под данный шаблон
 	 */
 	static {
-		LOGGER.debug("инифиализация списка специфичных команд");
+		LOGGER.debug("initialize list of specified commands");
 		String[] names = ConfigLoader.instance().getKeyArray("specified");
-		LOGGER.debug("получение списка всех ключей из конфигурационного файла");
+		LOGGER.debug("getting list of key from configuration file for text containing %s", "specified");
 		for(String name : names) {
-			LOGGER.debug("ключ с именем " + name);
+			LOGGER.debug("key with name %s", name);
 			try {
 				Pair<Pattern, Function<String, String>> pair = new Pair<>();
 				pair.setKey(Pattern.compile(ConfigLoader.instance().getValue(name + ".pattern")));
 				pair.setValue((Function<String, String>)Class.forName(ConfigLoader.instance().getValue(name + ".class")).newInstance());
-				LOGGER.debug("получение шаблона " + pair.getKey().toString() + ", и имени класса " + pair.getValue().toString());
+				LOGGER.debug("sending pattern %s, and name class %s", pair.getKey().toString(), pair.getValue().toString());
 				specifiedCommands.add(pair);
 			} catch (Exception e) {e.printStackTrace();}
 		}
