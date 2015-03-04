@@ -17,17 +17,9 @@ public class Server {
 	
 	private static final Logger LOGGER = LogManager.getLogger(Server.class);
 
-	public static void main(String... args) throws ClassNotFoundException {
-		if (args.length == 0) {// если не переданно не одного параметра
-			LOGGER.fatal("jar run without arguments");
-			System.exit(1);
-		}
+	public static void main(String... args) throws Exception {
 		
-		//устанавливаем конфиг
-		ConfigLoader.setDestination(args[0]);
-		
-		Class.forName("org.bgpu.rasberry_pi.core.IskanderusController");
-		Class.forName("org.bgpu.rasberry_pi.structs.ScriptCollection");
+		Initializer.init(args);
 		
 
 		try {
