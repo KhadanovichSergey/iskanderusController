@@ -17,10 +17,10 @@
 	    <Logger name="org.bgpu.rasberry_pi.core.IskanderusController" level="INFO" additivity="true"></Logger>
 		
 		<Logger name="org.bgpu.rasberry_pi.server.Server" level="INFO" additivity="true"></Logger>
-		<Logger name="org.bgpu.rasberry_pi.server.SocketListener" level="ALL" additivity="true"></Logger>
+		<Logger name="org.bgpu.rasberry_pi.server.SocketListener" level="OFF" additivity="true"></Logger>
 		
-		<Logger name="org.bgpu.rasberry_pi.structs.Command" level="ALL" additivity="true"></Logger>
-		<Logger name="org.bgpu.rasberry_pi.structs.ScriptCollection" level="ALL" additivity="true"></Logger>
+		<Logger name="org.bgpu.rasberry_pi.structs.Command" level="OFF" additivity="true"></Logger>
+		<Logger name="org.bgpu.rasberry_pi.structs.ScriptCollection" level="OFF" additivity="true"></Logger>
 		
 		<Root level="INFO">
 			<AppenderRef ref="MyFile"/>

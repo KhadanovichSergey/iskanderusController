@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bgpu.rasberry_pi.structs.AnswerSetable;
 import org.bgpu.rasberry_pi.structs.Command;
+import org.bgpu.rasberry_pi.structs.ConfigLoader;
 import org.bgpu.rasberry_pi.structs.Pair;
 
 /**
@@ -68,7 +69,7 @@ public class QueueTaskManager {
 	
 	private void init(String id) {
 		portManager.openPort();
-		programmNameDevice = portManager.work("name");
+		programmNameDevice = portManager.work(ConfigLoader.instance().getValue("commandToGetNameArduino"));
 		LOGGER.debug("get programm device's name %s", programmNameDevice);
 		idDevice = id;
 	}
@@ -116,7 +117,7 @@ public class QueueTaskManager {
 		ArrayList<String> result = new ArrayList<>();
 		synchronized (portManager) {
 			LOGGER.debug("generate command's list from %s", programmNameDevice);
-			StringTokenizer st = new StringTokenizer(portManager.work("listCommand"), ",");
+			StringTokenizer st = new StringTokenizer(portManager.work(ConfigLoader.instance().getValue("commandToGetListCommandsArduino")), ",");
 			while (st.hasMoreTokens())
 				result.add(st.nextToken());
 		}

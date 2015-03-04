@@ -33,7 +33,7 @@ public class Server {
 		try {
 			LOGGER.info("Starting server...");
 			@SuppressWarnings("resource")
-			ServerSocket ss = new ServerSocket(1010);
+			ServerSocket ss = new ServerSocket(Integer.parseInt(ConfigLoader.instance().getValue("portNumber")));
 			LOGGER.info("Started server...");
 			while (true) {
 				Socket socket = ss.accept();
