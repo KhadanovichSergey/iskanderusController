@@ -64,7 +64,6 @@ public class SocketListener implements Runnable {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			writer.write(str);
 			writer.flush();
-			LOGGER.debug("send part of answer [%s] to address %s", str, socket.getInetAddress());
 		} catch (IOException ioe) {ioe.printStackTrace();}
 	}
 	
@@ -103,7 +102,7 @@ public class SocketListener implements Runnable {
 	 */
 	public void analize(String text) throws InterruptedException {
 		boolean mark = false;
-		LOGGER.debug("analize message %s");
+		LOGGER.debug("analize message %s", text);
 		for(int i = 0; i < listAction.size() && !mark; ++i)
 			if (listAction.get(i).getKey().matcher(text).matches()) {
 				LOGGER.debug("message %s like pattern %s", text, listAction.get(i).getKey().toString());

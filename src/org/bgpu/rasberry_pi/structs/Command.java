@@ -44,7 +44,7 @@ public class Command {
 				Pair<Pattern, Function<String, String>> pair = new Pair<>();
 				pair.setKey(Pattern.compile(ConfigLoader.instance().getValue(name + ".pattern")));
 				pair.setValue((Function<String, String>)Class.forName(ConfigLoader.instance().getValue(name + ".class")).newInstance());
-				LOGGER.debug("sending pattern %s, and name class %s", pair.getKey().toString(), pair.getValue().toString());
+				LOGGER.debug("getting pattern %s, and name class %s", pair.getKey().toString(), pair.getValue().toString());
 				specifiedCommands.add(pair);
 			} catch (Exception e) {e.printStackTrace();}
 		}
