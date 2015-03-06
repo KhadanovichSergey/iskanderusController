@@ -95,7 +95,7 @@ public class PortManager {
 	public String work(String commandTo) {
 		String result = "";
 		try {
-			serialPort.writeBytes((separators[0] + commandTo + separators[1]).getBytes());
+			serialPort.writeBytes((separators[0] + commandTo + separators[1]).getBytes("UTF-8"));
 			LOGGER.debug("write data %s to port with name %s",
 				separators[0] + commandTo + separators[1], serialPort.getPortName());
 			LOGGER.debug("wait while answer didn't come from port with name %s", serialPort.getPortName());
