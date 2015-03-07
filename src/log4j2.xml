@@ -14,7 +14,9 @@
 	
 		<Logger name="org.bgpu.rasberry_pi.core.PortManager" level="ALL" additivity="true"></Logger>
 	    <Logger name="org.bgpu.rasberry_pi.core.QueueTaskManager" level="OFF" additivity="true"></Logger>
-	    <Logger name="org.bgpu.rasberry_pi.core.IskanderusController" level="INFO" additivity="true"></Logger>
+	    <Logger name="org.bgpu.rasberry_pi.core.IskanderusController" level="INFO" additivity="true">
+	    	<AppenderRef ref="Console"/>
+	    </Logger>
 		
 		<Logger name="org.bgpu.rasberry_pi.server.Server" level="INFO" additivity="true"></Logger>
 		<Logger name="org.bgpu.rasberry_pi.server.SocketListener" level="ALL" additivity="true"></Logger>
@@ -24,7 +26,6 @@
 		
 		<Root level="INFO">
 			<AppenderRef ref="MyFile"/>
-			<AppenderRef ref="Console"/>
 		</Root>
 	</Loggers>
 </Configuration>
