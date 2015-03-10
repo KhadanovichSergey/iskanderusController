@@ -24,6 +24,7 @@ public class PropertiesConfigLoader extends ConfigLoader {
 		.filter((s) -> s.contains(contain))
 		.map((s) -> s.replace(".text", "").replace(".class", "").replace("isPattern", "").trim())
 		.distinct()
+		.sorted()
 		.toArray(String[]::new);
 	}
 }

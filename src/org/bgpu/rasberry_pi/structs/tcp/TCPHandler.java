@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.bgpu.rasberry_pi.core.IskanderusController;
 import org.bgpu.rasberry_pi.structs.AnswerSetable;
 import org.bgpu.rasberry_pi.structs.Command;
-import org.bgpu.rasberry_pi.structs.Pair;
+import org.bgpu.rasberry_pi.structs.init.ConfigLoader.Action;
 
 public abstract class TCPHandler implements Function<String, String>, AnswerSetable {
 
@@ -45,13 +45,17 @@ public abstract class TCPHandler implements Function<String, String>, AnswerSeta
 	 * @throws NullPointerException если не специализированной команде не нашлось ардуины, 
 	 * 	которая может ее выполнить...
 	 */
+	@SuppressWarnings("unchecked")
 	protected void runCommand(Command c) throws NullPointerException {
 		// если команда, является специальной командой из списка команд
 		boolean mark = false;
-		for(Pair<Pattern, Function<String, String>> pair : Command.specifiedCommands)
-			if (pair.getKey().matcher(c.toString()).matches()) {
+		for(Action action : Command.specifiedCommands)
+			if (action.isPattern && Pattern.compile(action.text).matcher(c.toString()).matches()
+					|| !action.isPattern && c.toString().startsWith(action.text)) {
 				// установить в слот значение, говорящее что команды специализированная
-				answer = pair.getValue().apply(c.toString());
+				try {
+					answer = ((Function<String, String>)action.classAction.newInstance()).apply(c.toString());
+				} catch (Exception e) {e.printStackTrace();}
 				mark = true; // команда специализированная
 				break;
 			}

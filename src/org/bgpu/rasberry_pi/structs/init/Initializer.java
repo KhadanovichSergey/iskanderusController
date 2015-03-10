@@ -1,11 +1,10 @@
-package org.bgpu.rasberry_pi.server;
+package org.bgpu.rasberry_pi.structs.init;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.regex.Pattern;
 
-import org.bgpu.rasberry_pi.structs.ConfigLoader;
 import org.bgpu.rasberry_pi.structs.Pair;
 
 public class Initializer {

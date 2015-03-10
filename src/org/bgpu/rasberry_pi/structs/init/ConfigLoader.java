@@ -2,25 +2,24 @@ package org.bgpu.rasberry_pi.structs.init;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class ConfigLoader {
 	
 	/**
 	 * таблица ключ-значение
 	 */
-	private HashMap<String, String> hash = new HashMap<>();
+	protected HashMap<String, String> hash = new HashMap<>();
 	
 	/**
 	 * список команд для расберепи
 	 */
-	@SuppressWarnings("unused")
-	private ArrayList<Action> listSpecifiedCommand = new ArrayList<>();
+	protected ArrayList<Action> listSpecifiedCommand = new ArrayList<>();
 	
 	/**
 	 * список tcpHandler ов
 	 */
-	@SuppressWarnings("unused")
-	private ArrayList<Action> listTCPHandler = new ArrayList<>();
+	protected ArrayList<Action> listTCPHandler = new ArrayList<>();
 	
 	/**
 	 * объект ConfigLoader должен быть создан в единственном экземпляре
@@ -69,6 +68,13 @@ public abstract class ConfigLoader {
 		return hash.get(key);
 	}
 	
+	public List<Action> getSpecifiedCommands() {
+		return listSpecifiedCommand;
+	}
+	
+	public List<Action> getTCPHandlers() {
+		return listTCPHandler;
+	}
 	/**
 	 * метод, который читает конфигурационный файл
 	 * и заполняет внутренник поля класса по определенному механизму,
@@ -82,7 +88,7 @@ public abstract class ConfigLoader {
 	 * @author bazinga
 	 *
 	 */
-	static protected class Action {
+	static public class Action {
 		public String text; 				// текстовый шаблон команды
 		
 		@SuppressWarnings("rawtypes")

@@ -1,54 +1,28 @@
 package org.bgpu.rasberry_pi.structs;
 
-import java.util.ArrayList;
-import java.util.function.Function;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
+import org.bgpu.rasberry_pi.structs.init.ConfigLoader;
+import org.bgpu.rasberry_pi.structs.init.ConfigLoader.Action;
 
 /**
  * представляет команду для ардуины
  * @author bazinga
  *
  */
-@SuppressWarnings("unchecked")
 public class Command {
-	
-	private static final Logger LOGGER = LogManager.getFormatterLogger(Command.class);
-	
 	/**
 	 * регулярное выражение команды
 	 */
 	private static final Pattern pattern = Pattern.compile("^(?<nameCommand>[a-zA-Z0-9]+)(" + ConfigLoader.instance().getValue("separatorArguments") + "[0-9]+)*$");
 	
 	/**
-	 * список пар шаблонов специфичных команд и действий, в ответ на эти команды
+	 * список специфичных команд, загруженных из конфигурационого файла
 	 */
-	public static ArrayList<Pair<Pattern, Function<String, String>>> specifiedCommands = new ArrayList<>();
-	
-	/**
-	 * инициализация списка пар, путем чтения конфигурационного файла
-	 * со значенями шаблонов и полных имен классов, инстансы которых будут обрабатывать событие,
-	 * подходящее под данный шаблон
-	 */
-	static {
-		LOGGER.debug("initialize list of specified commands");
-		String[] names = ConfigLoader.instance().getKeyArray("specified");
-		LOGGER.debug("getting list of key from configuration file for text containing %s", "specified");
-		for(String name : names) {
-			LOGGER.debug("key with name %s", name);
-			try {
-				Pair<Pattern, Function<String, String>> pair = new Pair<>();
-				pair.setKey(Pattern.compile(ConfigLoader.instance().getValue(name + ".pattern")));
-				pair.setValue((Function<String, String>)Class.forName(ConfigLoader.instance().getValue(name + ".class")).newInstance());
-				LOGGER.debug("getting pattern %s, and name class %s", pair.getKey().toString(), pair.getValue().toString());
-				specifiedCommands.add(pair);
-			} catch (Exception e) {e.printStackTrace();}
-		}
-	}
+	public static final List<Action> specifiedCommands = ConfigLoader.instance().getSpecifiedCommands();
 	
 	/**
 	 * текстовое представление команды name:par1:par2:...:parN

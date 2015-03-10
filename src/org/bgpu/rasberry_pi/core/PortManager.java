@@ -2,7 +2,7 @@ package org.bgpu.rasberry_pi.core;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bgpu.rasberry_pi.structs.ConfigLoader;
+import org.bgpu.rasberry_pi.structs.init.ConfigLoader;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
