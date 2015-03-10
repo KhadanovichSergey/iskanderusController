@@ -32,7 +32,7 @@ public class PropertiesConfigLoader extends ConfigLoader {
 			for(String key : keys)
 				hash.put(key, prop.getProperty(key));
 			
-		} catch (Exception e) {e.printStackTrace();}
+		} catch (Exception e) {LOGGER.catching(e);}
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class PropertiesConfigLoader extends ConfigLoader {
 				action.classAction = Class.forName(prop.getProperty(key + ".class"));
 				action.isPattern = Boolean.parseBoolean(prop.getProperty(key + ".isPattern"));
 				list.add(action);
-			} catch (Exception e) {e.printStackTrace();}
+			} catch (Exception e) {LOGGER.catching(e);}
 		}
 	}
 }

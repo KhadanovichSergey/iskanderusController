@@ -94,7 +94,7 @@ public class XMLConfigLoader extends ConfigLoader {
 				case "class" :
 					try {
 						action.classAction = Class.forName(value); break;
-					} catch (ClassNotFoundException cnfe) {cnfe.printStackTrace();}
+					} catch (ClassNotFoundException cnfe) {LOGGER.catching(cnfe);}
 				case "isPattern" :
 					action.isPattern = Boolean.parseBoolean(value); break;
 			}
