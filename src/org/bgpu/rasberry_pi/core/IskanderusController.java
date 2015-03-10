@@ -19,7 +19,8 @@ import org.bgpu.rasberry_pi.structs.Pair;
 import jssc.SerialPortList;
 
 /**
- * @author bzinga
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
  */
 public class IskanderusController {
 	

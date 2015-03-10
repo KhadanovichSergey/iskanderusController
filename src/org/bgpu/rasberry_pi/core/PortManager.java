@@ -14,7 +14,9 @@ import jssc.SerialPortException;
  * сообщения представляют собой простую строку, которая внутри метода перед отправкой
  * оборачивается в separators и после чтения ответа эти же separators отбрасываются
  * сепароторы команды, устанавливаются в конфигурационной файле
- * @author bazinga
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
  */
 public class PortManager {
 
@@ -72,7 +74,7 @@ public class PortManager {
 					Integer.parseInt(ConfigLoader.instance().getValue("parity")));
 			serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
             serialPort.addEventListener(serialReader);
-		} catch(Exception e) { LOGGER.catching(e);}
+		} catch(Exception e) { LOGGER.catching(e); }
 	}
 	
 	/**

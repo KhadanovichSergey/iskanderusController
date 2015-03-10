@@ -14,8 +14,9 @@ import org.bgpu.rasberry_pi.structs.Pair;
 
 /**
  * буферезированная очередь к порту
- * @author bazinga
- *
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
  */
 public class QueueTaskManager {
 	
@@ -171,7 +172,7 @@ public class QueueTaskManager {
 							LOGGER.debug("worker to device %s is sleeped", programmNameDevice);
 							obj.wait();
 						}
-				} catch (InterruptedException iex) {iex.printStackTrace();}
+				} catch (InterruptedException iex) { LOGGER.catching(iex); }
 				Thread.yield();
 			}
 		}
