@@ -37,7 +37,7 @@ public abstract class ConfigLoader {
 	public static final void setDestination(String configDestination) {
 		if (configDestination.endsWith(".xml"))
 			CONFIG_LOADER = new XMLConfigLoader(configDestination);
-		else if (configDestination.endsWith(".property"))
+		else if (configDestination.endsWith(".properties"))
 			CONFIG_LOADER = new PropertiesConfigLoader(configDestination);
 		else throw new IllegalArgumentException("wrong file format");
 	}
