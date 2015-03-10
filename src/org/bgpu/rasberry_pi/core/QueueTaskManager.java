@@ -9,8 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bgpu.rasberry_pi.structs.AnswerSetable;
 import org.bgpu.rasberry_pi.structs.Command;
-import org.bgpu.rasberry_pi.structs.ConfigLoader;
 import org.bgpu.rasberry_pi.structs.Pair;
+import org.bgpu.rasberry_pi.structs.init.ConfigLoader;
 
 /**
  * буферезированная очередь к порту

@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bgpu.rasberry_pi.structs.ConfigLoader;
-import org.bgpu.rasberry_pi.structs.Pair;
+import org.bgpu.rasberry_pi.structs.init.ConfigLoader;
+import org.bgpu.rasberry_pi.structs.init.ConfigLoader.Action;
 import org.bgpu.rasberry_pi.structs.tcp.TCPHandler;
 
 /**
@@ -67,31 +67,10 @@ public class SocketListener implements Runnable {
 		} catch (IOException ioe) {ioe.printStackTrace();}
 	}
 	
-		
 	/**
-	 * таблица ассоциаций между шаблонами запросов на сервер и именами классов,
-	 * которые эти запросы обрабатывают
+	 * список действий на приходящие сообщения
 	 */
-	private static ArrayList<Pair<Pattern, String>> listAction = new ArrayList<>();
-	
-	/**
-	 * чтение конфига и инифиализация списка ассоциаций
-	 */
-	static {
-		LOGGER.debug("initialize handlers tcp commands");
-		String[] names = ConfigLoader.instance().getKeyArray("tcpHandler");
-		for(String name : names) {
-			LOGGER.debug("key tcpHandler %s", name);
-			try {
-				Pair<Pattern, String> pair = new Pair<>();
-				pair.setKey(Pattern.compile(ConfigLoader.instance().getValue(name + ".pattern")));
-				pair.setValue(ConfigLoader.instance().getValue(name + ".class"));
-				LOGGER.debug("get pattern %s and class name %s",
-						pair.getKey().toString(), pair.getValue());
-				listAction.add(pair);
-			} catch (Exception e) {LOGGER.catching(e);}
-		}
-	}
+	private static final List<Action> listAction = ConfigLoader.instance().getTCPHandlers();
 	
 	/**
 	 * этот метод, анализирует сообщение, которые было получено по сети, на соответсвие
@@ -100,18 +79,22 @@ public class SocketListener implements Runnable {
 	 * @param text текст запроса, полученный по сети
 	 * @throws InterruptedException
 	 */
-	public void analize(String text) throws InterruptedException {
+	public void analize(String text) throws InterruptedException {		
 		boolean mark = false;
 		LOGGER.debug("analize message %s", text);
-		for(int i = 0; i < listAction.size() && !mark; ++i)
-			if (listAction.get(i).getKey().matcher(text).matches()) {
-				LOGGER.debug("message %s like pattern %s", text, listAction.get(i).getKey().toString());
+		
+		for(int i = 0; i < listAction.size() && !mark; ++i) {
+			if (listAction.get(i).isPattern && Pattern.compile(listAction.get(i).text).matcher(text).matches()
+				|| !listAction.get(i).isPattern && text.startsWith(listAction.get(i).text)) {
+				LOGGER.debug(listAction.get(i).isPattern ? "message %s like pattern %s" : "message %s startWith %s",
+						text, listAction.get(i).text);
 				try {
-					send(((TCPHandler)Class.forName(listAction.get(i).getValue()).newInstance()).myApply(text));
-					LOGGER.debug("run assosiated handler %s", listAction.get(i).getValue());
-					mark = true;
-				} catch (Exception e) {e.printStackTrace();}
+					send(((TCPHandler)listAction.get(i).classAction.newInstance()).apply(text));
+				} catch (Exception e) { e.printStackTrace(); }
+				LOGGER.debug("run assosiated handler %s", listAction.get(i).classAction);
+				mark = true;
 			}
+		}
 		if (!mark) {
 			LOGGER.debug("message did't like any pattern");
 			send("[" + text + "] is not a command of protocol");

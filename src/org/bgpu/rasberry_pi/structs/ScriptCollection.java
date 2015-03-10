@@ -16,6 +16,7 @@ import org.bgpu.rasberry_pi.exception.CollectionIsEmptyException;
 import org.bgpu.rasberry_pi.exception.ScriptIsEmptyException;
 import org.bgpu.rasberry_pi.exception.ScriptNotFoundException;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
+import org.bgpu.rasberry_pi.structs.init.ConfigLoader;
 
 public class ScriptCollection {
 	

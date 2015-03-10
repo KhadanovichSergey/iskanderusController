@@ -6,7 +6,8 @@ import java.net.Socket;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bgpu.rasberry_pi.structs.ConfigLoader;
+import org.bgpu.rasberry_pi.structs.init.ConfigLoader;
+import org.bgpu.rasberry_pi.structs.init.Initializer;
 
 /**
  * главный класс этого проекта
