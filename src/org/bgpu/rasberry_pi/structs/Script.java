@@ -5,8 +5,9 @@ import java.util.Iterator;
 
 /**
  * скрипт - последовательность команд для разлиных ардуин
- * @author bazinga
- *
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
  */
 public class Script implements Iterable<Command>{
 

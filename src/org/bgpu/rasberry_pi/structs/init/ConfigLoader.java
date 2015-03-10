@@ -4,6 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * <h1>ConfigLoader - Суперкласс для всех загрузчиков</h1>
+ * <p>
+ * Подкласса данного класса пользоваться не рекомендуется...
+ * Первым делом нужно воспользоваться методом setDestinantion(String fileName)
+ * чтобы установить путь к файлу конфигурации. В зависимости от типа файла
+ * (*.properties или *.xml) ConfigLoader инициализуется различными подклассами,
+ * которые по разному заполняют внутренние поля данными.
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
+ */
 public abstract class ConfigLoader {
 	
 	/**
@@ -12,7 +24,7 @@ public abstract class ConfigLoader {
 	protected HashMap<String, String> hash = new HashMap<>();
 	
 	/**
-	 * список команд для расберепи
+	 * список команд для расберепи, которые не отправляются на ардуины
 	 */
 	protected ArrayList<Action> listSpecifiedCommand = new ArrayList<>();
 	
@@ -85,7 +97,7 @@ public abstract class ConfigLoader {
 	
 	/**
 	 * класс, для построение списка действий, которые читаются из файла
-	 * @author bazinga
+	 * @author Khadanovich Sergey
 	 *
 	 */
 	static public class Action {

@@ -18,8 +18,9 @@ import org.bgpu.rasberry_pi.structs.tcp.TCPHandler;
 /**
  * класс, получающий данные из сокета
  * принимающий ответствнные действия по анализую данные и выполнению команд, отправке результата
- * @author bazinga
- *
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
  */
 public class SocketListener implements Runnable {
 
@@ -64,7 +65,7 @@ public class SocketListener implements Runnable {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			writer.write(str);
 			writer.flush();
-		} catch (IOException ioe) {ioe.printStackTrace();}
+		} catch (IOException ioe) {LOGGER.catching(ioe);}
 	}
 	
 	/**
@@ -90,7 +91,7 @@ public class SocketListener implements Runnable {
 						text, listAction.get(i).text);
 				try {
 					send(((TCPHandler)listAction.get(i).classAction.newInstance()).apply(text));
-				} catch (Exception e) { e.printStackTrace(); }
+				} catch (Exception e) { LOGGER.catching(e); }
 				LOGGER.debug("run assosiated handler %s", listAction.get(i).classAction);
 				mark = true;
 			}

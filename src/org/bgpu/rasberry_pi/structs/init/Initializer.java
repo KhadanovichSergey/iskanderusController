@@ -6,7 +6,15 @@ import java.io.FileWriter;
 import java.util.regex.Pattern;
 
 import org.bgpu.rasberry_pi.structs.Pair;
-
+/** 
+ * <h1>Initializer - инициализатор</h1>
+ * <p>Производит первоначальную инициализацию различных классов,
+ * необходимых для работы сервера. Инициалзицаия производится по
+ * параметрам, которые передаются в консоль к jar файлу.
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
+ */
 public class Initializer {
 	
 	@SuppressWarnings("unchecked")
@@ -17,7 +25,7 @@ public class Initializer {
 	}
 	
 	public static void init(String... args) throws Exception {
-		if (args.length < 2)
+		if (args.length < 2) // количество параметров должно быть минимум два
 			throw new Exception("error count of jar's parameters");
 		
 		for(String par : args) {

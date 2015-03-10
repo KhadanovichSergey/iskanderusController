@@ -10,6 +10,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * <h1>ConfigLoader, ответственный за загрузку конфига из xml файла</h1>
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
+ */
 public class XMLConfigLoader extends ConfigLoader {
 
 	public XMLConfigLoader(String fileName) {

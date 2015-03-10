@@ -11,8 +11,9 @@ import org.bgpu.rasberry_pi.structs.init.Initializer;
 
 /**
  * главный класс этого проекта
- * @author bazinga
- *
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
  */
 public class Server {
 	
@@ -33,7 +34,7 @@ public class Server {
 				LOGGER.info("connected client");
 				new Thread(new SocketListener(socket)).start();
 			}
-		} catch (IOException e) {e.printStackTrace();}
+		} catch (IOException e) {LOGGER.catching(e);}
 		
 	}
 }

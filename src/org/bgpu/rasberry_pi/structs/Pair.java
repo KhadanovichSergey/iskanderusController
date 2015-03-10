@@ -2,7 +2,9 @@ package org.bgpu.rasberry_pi.structs;
 
 /**
  * пара для общих нужд
- * @author bazinga
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
  *
  * @param <K>
  * @param <V>

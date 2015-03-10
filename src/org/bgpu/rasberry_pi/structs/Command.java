@@ -10,8 +10,9 @@ import org.bgpu.rasberry_pi.structs.init.ConfigLoader.Action;
 
 /**
  * представляет команду для ардуины
- * @author bazinga
- *
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
  */
 public class Command {
 	/**

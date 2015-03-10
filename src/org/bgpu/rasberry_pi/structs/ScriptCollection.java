@@ -18,6 +18,10 @@ import org.bgpu.rasberry_pi.exception.ScriptNotFoundException;
 import org.bgpu.rasberry_pi.exception.WrongFormatCommandException;
 import org.bgpu.rasberry_pi.structs.init.ConfigLoader;
 
+/** 
+* @author Khadanovich Sergey
+* @since 2015-03-10
+*/
 public class ScriptCollection {
 	
 	private static final Logger LOGGER = LogManager.getLogger(ScriptCollection.class);

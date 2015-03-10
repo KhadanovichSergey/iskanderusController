@@ -4,6 +4,13 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
+/**
+ * <h1>PropertiesConfigLoader - лоадер, ответственный за загрузку конфигурационного
+ * файла в виде провертисов</h1>
+ * 
+ * @author Khadanovich Sergey
+ * @since 2015-03-10
+ */
 public class PropertiesConfigLoader extends ConfigLoader {
 
 	public PropertiesConfigLoader(String fileName) {
@@ -28,6 +35,12 @@ public class PropertiesConfigLoader extends ConfigLoader {
 		} catch (Exception e) {e.printStackTrace();}
 	}
 
+	/**
+	 * получение всех ключей, создержающихся в Properties, содержащие строку contain
+	 * @param prop пропертис
+	 * @param contain строку, вхождение который является необходимым условием
+	 * @return массив необходимых ключей
+	 */
 	private String[] getKeyArray(Properties prop, String contain) {
 		return prop.keySet().stream()
 		.map((o) -> (String)o)
@@ -38,6 +51,12 @@ public class PropertiesConfigLoader extends ConfigLoader {
 		.toArray(String[]::new);
 	}
 	
+	/**
+	 * по необходмым значениям пропертисов получется обексты Action и добавляет их в список list
+	 * @param prop пропертис
+	 * @param contain строка, вхождение которой необходимо для поиска
+	 * @param list целевой список
+	 */
 	private void addAction(Properties prop, String contain, ArrayList<Action> list) {
 		String[] keys = getKeyArray(prop, contain);
 		for(String key : keys) {
