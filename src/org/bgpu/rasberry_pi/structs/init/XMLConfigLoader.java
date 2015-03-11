@@ -28,7 +28,7 @@ public class XMLConfigLoader extends ConfigLoader {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			SAXParser parser = factory.newSAXParser();
 			parser.parse(new File(fileName), new XMLHandler());
-		} catch (Exception e) {e.printStackTrace();}
+		} catch (Exception e) {LOGGER.catching(e);}
 		
 	}
 	
