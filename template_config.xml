@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<settings>
+	<!--- 
+		настройки протокола между расбере пи и ардуинами
+	-->
+	<arduinoProtocol>
+		<!--- разделители -->
+		<separators>
+			<start>$</start> <!--- разделитель начала команды -->
+			<stop>;</stop>   <!--- разделитель конца команды -->
+			<arguments>.</arguments> <!--- разделитель аргументов в команде -->
+		</separators>
+		<serialPort>
+			<baudRate>38400</baudRate>
+			<dataBits>8</dataBits>
+			<stopBits>1</stopBits>
+			<parity>0</parity>
+		</serialPort>
+		<!--- количество миллисекунд, на которые необходимо уснуть после открытия портов -->
+		<sleepAfterOpenPort>1000</sleepAfterOpenPort>
+		<!--- команда для получения имени ардуины -->
+		<commandToGetNameArduino>name</commandToGetNameArduino>
+		<!--- команда для получения списка команд этой ардуины -->
+		<commandToGetListCommandsArduino>listCommand</commandToGetListCommandsArduino>
+	</arduinoProtocol>
+
+	<server>
+		<!--- для блока команда tcpHandlers specifiedCommand
+			tcpHandlers - команды, которые приходят по сети, могут иметь любой формат
+			specifiedCommand - внутренние команды расберепи, имеют формат, такой же как и команды
+				для ардуин, могут входить в состав скриптов или просто выполняться непосредственно
+			в каждом из блоков может быть описанна команад в формате
+			<command>
+				<name>
+					имя команды
+					это значение нигде не используется и писать его необезательно,
+					сделанно для того чтобы было проше искать нужную команду в конфигурационном файле
+				</name>
+				<textPresentation>
+					текстовое представление команды. может быть в двух вариантах
+					ввиде регулярного выражения по стандарту POSIX либо просто текст
+				</textPresentation>
+				<class>
+					класс-обработчик соответсвующей команды
+				</class>
+				<isPattern>
+					значение boolean - является ли текстовое представление команды
+					регулярным выражением
+				</isPattern>
+			</command>
+		 -->
+		<tcpHandlers>
+			<command>
+				<name>Run Command</name>
+				<textPresentation>^run command .*$</textPresentation>
+				<class>org.bgpu.rasberry_pi.structs.tcp.RunCommand</class>
+				<isPattern>true</isPattern>
+			</command>
+			<command>
+				<name>Run Script</name>
+				<textPresentation>^run script [a-zA-Z0-9]+$</textPresentation>
+				<class>org.bgpu.rasberry_pi.structs.tcp.RunScript</class>
+				<isPattern>true</isPattern>
+			</command>
+			<command>
+				<name>Save Script</name>
+				<textPresentation>^save script [a-zA-Z0-9]+( [^ ]+)+$</textPresentation>
+				<class>org.bgpu.rasberry_pi.structs.tcp.SaveScript</class>
+				<isPattern>true</isPattern>
+			</command>
+			<command>
+				<name>Delete Script</name>
+				<textPresentation>^delete script [a-zA-Z0-9]+$</textPresentation>
+				<class>org.bgpu.rasberry_pi.structs.tcp.DeleteScript</class>
+				<isPattern>true</isPattern>
+			</command>
+		</tcpHandlers>
+		<specifiedCommands>
+			<command>
+				<name>pause</name>
+				<textPresentation>^pause.[0-9]+$</textPresentation>
+				<class>org.bgpu.rasberry_pi.structs.specified.Pause</class>
+				<isPattern>true</isPattern>
+			</command>
+			<command>
+				<name>listScripts</name>
+				<textPresentation>^listScript$</textPresentation>
+				<class>org.bgpu.rasberry_pi.structs.specified.ListScripts</class>
+				<isPattern>true</isPattern>
+			</command>
+		</specifiedCommands>
+		<pathToDirWithScripts>/etc/raspberry/scripts</pathToDirWithScripts>
+		<portNumber>55512</portNumber>
+	</server>
+</settings>
