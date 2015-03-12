@@ -3,6 +3,8 @@ package org.bgpu.rasberry_pi.structs.tcp;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bgpu.rasberry_pi.core.IskanderusController;
 import org.bgpu.rasberry_pi.structs.AnswerSetable;
 import org.bgpu.rasberry_pi.structs.Command;
@@ -10,6 +12,7 @@ import org.bgpu.rasberry_pi.structs.init.ConfigLoader.Action;
 
 public abstract class TCPHandler implements Function<String, String>, AnswerSetable {
 
+	private static final Logger LOGGER = LogManager.getLogger();
 	/**
 	 * слот
 	 * сюда помещается ответ от QueueTaskManager instance
@@ -55,7 +58,7 @@ public abstract class TCPHandler implements Function<String, String>, AnswerSeta
 				// установить в слот значение, говорящее что команды специализированная
 				try {
 					answer = ((Function<String, String>)action.classAction.newInstance()).apply(c.toString());
-				} catch (Exception e) {e.printStackTrace();}
+				} catch (Exception e) {LOGGER.catching(e);}
 				mark = true; // команда специализированная
 				break;
 			}
@@ -64,7 +67,7 @@ public abstract class TCPHandler implements Function<String, String>, AnswerSeta
 			synchronized (obj) {
 				try {
 					obj.wait();
-				} catch (InterruptedException e) {e.printStackTrace();}
+				} catch (InterruptedException e) {LOGGER.catching(e);}
 			}
 		}
 	}
