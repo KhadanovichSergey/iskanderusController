@@ -10,7 +10,7 @@ public class RunCommand extends TCPHandler {
 		String textPC = t.replace("run command", "").trim(); // текстовое представление команды
 		try {
 			runCommand(new Command(textPC)); //выполнение команды
-			append("command [" + textPC + "] run succefull with answer [" + answer + "]");
+			append("command " + textPC + " run succefull with answer [" + answer + "]");
 		} catch (WrongFormatCommandException wfce) {
 			append("wrong format command [" + textPC + "]");
 		} catch (NullPointerException npe) {
