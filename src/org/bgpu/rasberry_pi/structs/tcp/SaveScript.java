@@ -24,7 +24,7 @@ public class SaveScript extends TCPHandler {
 			try {
 				Command c = new Command(textPC);
 				script.addCommand(c);
-				append("add command [" + textPC + "] succefull");
+				append("add command [" + textPC + "] successfully");
 			} catch (WrongFormatCommandException wfce) {// если в формате команды ошибка
 				append("wrong format command [" + textPC + "] not add to script");
 				result = true;

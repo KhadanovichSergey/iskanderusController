@@ -12,15 +12,27 @@
 
 1) комнады, которые переправляются на соответствующую ей ардуину.
 	эти команды должны быть определенного формата
-	command_name.parameter1.parameter2 ... .parameterN
+	command_name.parameter1.parameter2 ... .parameterN, где
+		command_name - идентификатор, состоящий из больших и маленьких латинских символов и цифр
+		parameter i - положительное число
+	
 	количество параментров может быть сколько угодно, в том числе 0
+	
+	пример комманд:
+		throat.100, pause.1000, name
 	
 2) команды, которые выполняются непосредственного на расбере пи
 	должны быть такого же формата как и команды для ардуин
    
 	в сервере по умолчания есть две таких команды:
 		pause.countMillisecond - наличие параметра обезательно
-		listScript без параметров
+		listScript
+		пример использования
+			run command listScript
+		пример ответа
+			command listScript run successfully with answer [list_names_of_script], где
+				list_names_of_script - список имен скриптов через пробел
+				command listScript run successfully with answer [pause arm throat], ответ сервера, если он содержит только три скрипта
    
    для того, чтобы добавить свою собственную специфичную команды необходимо
    выполнить последовательность шагом:
@@ -67,36 +79,102 @@
 		пример
 			run command throat.57 (команда, перенаправляемая на одну из ардуин)
 			run command pause.1000 (команда для расбере пи)
+			
+		в качестве результата сервер возвращает ответ в виде строки, заканчивающейся \n
+		
+		 - если команда выполнена успешно, то
+		 	command text run successfully with answer [answer], где text - текстовое представление команды,
+		 	которую вы хотели выполнить, [answer] - результат выполнения команды
+		 - если команда заданна не верно (не удовлетворяет шаблону), то
+		 	wrong format command [text], где text - текстовое представление команды
+		 - если команда заданна верно, но ее нет в списках команд, то
+		 	command not found [text], где text - текстовое представление команды
 		
 		* save script script_name command1 command2 command3 ... commandN
 		script - именнованная последовательность команд
-		данная комана, сохраняет script под имененем script_name в файл script_name.script
-		команда i - любая команда вида 1 или 2
+		данная комана, сохраняет script под имененем script_name в файл script_name.script в каталог, который указан в конфигурационном файле
+		command i - любая команда вида 1 или 2
+		
+		script_name - идентификатор, который может состоять из больших и маленьких латинских символов и цифр
 		
 		если вы сохраняите скрипт под именем которые уже есть, скрипт перезаписывается
 		
 		пример
 			save script throat_tuda_siuda throat.0 pause.1000 throat.100 pause.1000 throat.0
+		если хотя одна команда не распознана на данный момент, то скрипт не добавляется...
 		
+		пример ответа на правильно добавленный скрипт
+			
+			create script with name [throat_tuda_siuda]
+			add command [throat.0] successfully
+			add command [pause.1000] successfully
+			add command [throat.100] successfully
+			add command [pause.1000] successfully
+			add command [throat.0] successfully
+			script add to ScriptCollection
+			
+		пример ответа на добавление скрипта с неправильной командой
+		
+			save script one one&:-100 pause.1000 pupsia
+			
+			create script with name [one]
+			wrong format command [one&:-100]
+			add command [pause.1000] successfully
+			add command [pupsia] successfully
+			script not add to ScriptCollection
+		
+			
 		* run script script_name
 		script_name - имя скрипта
 		Данная команда запускает скрипт по имени, который вы заранее сохранили с помощью предыдущей команды
 		
 		пример
 			run script throat_tuda_siuda
+			
+		пример результата выполнения команды
+		
+			start script with name [throat_tuda_siuda]
+			command throat.0 run successfully with answer [answer0]
+			command pause.1000 run successfully with answer [answer1]
+			command throat.100 run successfully with answer [answer2]
+			command pause.1000 run successfully with answer [answer3]
+			command throat.0 run successfully with answer [answer4]
+			stop script with name [throat_tuda_siuda]
+			
+		если скрипта с именем script_name не удалось найти в коллекции скриптов, то
+		ответ будет такой:
+			
+			script with name [throat_tuda_siuda] not found
 		
 		* delete script script_name
 		script_name - имя скрипта
 		удаляет скрипт по имени
 		
-		пример
+		пример запроса
+		
 			delete script throat_tuda_siuda
+		
+		пример ответа
+		
+			если скрипт с таким именем есть на сервере, то
+				script with name [throat_tuda_siuda] deleted
+			если скрипт с таким именем не найден, то
+				script with name [throat_tuda_siuda] not found
 			
 		* read script script_name
 		script_name - имя скрипта
-		возвращает список команд в скрипте через пробел
 		
-		пример
+		пример запроса
+			
+			read script throat_tuda_siuda
+		
+		пример ответа
+		
+			если скрипт с таким именем найден, то
+				script with name throat_tuda_siuda consists [listCommand], где
+				listCommand - список команд, разделенных пробелами
+			если скрипт с таким именем не найден то,
+				script with name [throat_tuda_siuda] not found
 					
 	для создания своей собственной команды такого типа необходимо
 	

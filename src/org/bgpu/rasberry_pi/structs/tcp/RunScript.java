@@ -18,7 +18,7 @@ public class RunScript extends TCPHandler {
 			for(Command c : script)
 				try {
 					runCommand(c);
-					append("command " + c + " run succefull with answer [" + answer + "]");
+					append("command " + c + " run successfully with answer [" + answer + "]");
 				} catch (NullPointerException npe) {
 					append("command not found [" + c + "]");
 				}

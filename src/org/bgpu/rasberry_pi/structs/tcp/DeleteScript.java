@@ -12,7 +12,7 @@ public class DeleteScript extends TCPHandler {
 			ScriptCollection.instance().deleteScript(scriptName);
 			append("script with name [" + scriptName + "] deleted");
 		} catch (ScriptNotFoundException snfe) {
-			append("script not found");
+			append("script with name [" + scriptName + " not found");
 		}
 		return toString();
 	}

@@ -14,7 +14,7 @@ public class ReadScript extends TCPHandler {
 			Script script = ScriptCollection.instance().getScript(scriptName);
 			append("script with name " + scriptName + " consists [" + script.toString() + "]");
 		} catch (ScriptNotFoundException snfe) {
-			append("script not found");
+			append("script with name [" + scriptName + "] not found");
 		}
 		return toString();
 	}
