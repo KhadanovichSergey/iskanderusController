@@ -49,7 +49,7 @@ public class SocketListener implements Runnable {
 	private String recieve() {
 		String result = null;
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
 			result = reader.readLine();
 			LOGGER.debug("from tcp come command [%s]", result);
 		} catch (IOException ioe) {LOGGER.catching(ioe);}
@@ -62,7 +62,7 @@ public class SocketListener implements Runnable {
 	 */
 	private void send(String str) {
 		try {
-			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "utf-8"));
 			writer.write(str);
 			writer.flush();
 		} catch (IOException ioe) {LOGGER.catching(ioe);}

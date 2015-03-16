@@ -32,6 +32,11 @@ public class Initializer {
 			if (Pattern.compile("^config=.*$").matcher(par).matches()) {
 				String fileName = par.replace("config=", "").trim();
 				File file = new File(fileName);
+				
+				//
+				System.setProperty("user.dir", file.getParent());
+				//
+				
 				if (!file.exists())
 					throw new Exception("config file not exists");
 				else {

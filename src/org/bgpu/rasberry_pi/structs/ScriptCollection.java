@@ -3,9 +3,11 @@ package org.bgpu.rasberry_pi.structs;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -101,7 +103,7 @@ public class ScriptCollection {
 	 * @throws WrongFormatCommandException если файл не прочитался, команда в неправильном формате
 	 */
 	private void loadScript(File file) throws WrongFormatCommandException {
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"))) {
 			String line = reader.readLine();
 			StringTokenizer tokenizer = new StringTokenizer(line);
 			Script script = new Script(file.getName().replace(".script", "").trim());
@@ -117,7 +119,7 @@ public class ScriptCollection {
 	 */
 	private void unloadCollection(String dirName) {
 		for(Script s : scripts) {
-			try (BufferedWriter writer = new BufferedWriter(new FileWriter(ScriptCollection.DIR_NAME + "/" + s.getName() + ".script"))) {
+			try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(ScriptCollection.DIR_NAME + "/" + s.getName() + ".script"), "utf-8"))) {
 				writer.write(s.toString() + System.getProperty("line.separator"));
 				writer.flush();
 			} catch (IOException ioe) {LOGGER.catching(ioe);}
